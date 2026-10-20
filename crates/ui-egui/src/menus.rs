@@ -172,6 +172,8 @@ pub const UI_COMMANDS: &[UiCommand] = &[
     ("view.sidebarSection", "Show Sidebar Section", None, ""),
     ("view.sidebarMoveSection", "Move Sidebar Section", None, ""),
     ("view.sidebarReset", "Reset Sidebar Sections", None, ""),
+    // {sort?: tree | date}: how the Folders section lists folders (flips when omitted)
+    ("view.folderSort", "Sort Folders", None, ""),
     ("view.slideshow", "Slideshow", Some("Cmd+Alt+Enter"), "View"),
     ("view.slideshowOptions", "Slideshow Options…", None, "View"),
     ("dialog.slideshowExport", "Export Slideshow…", None, "View"),
@@ -474,6 +476,18 @@ pub fn run_ui_command(app: &mut LightcraftApp, id: &str, p: &Value) -> Option<Re
         "view.photoCounts" => {
             app.ui.show_counts = p.get("show").and_then(Value::as_bool).unwrap_or(!app.ui.show_counts);
             Ok(json!({"show": app.ui.show_counts}))
+        }
+        "view.folderSort" => {
+            use crate::state::FolderSort;
+            let sort = match p.get("sort").and_then(Value::as_str) {
+                Some("tree") => FolderSort::Tree,
+                Some("date") => FolderSort::Date,
+                Some(other) => return Some(Err(format!("view.folderSort: unknown `{other}` (tree|date)"))),
+                None if app.ui.folder_sort == FolderSort::Tree => FolderSort::Date,
+                None => FolderSort::Tree,
+            };
+            app.ui.folder_sort = sort;
+            Ok(json!({"sort": if sort == FolderSort::Date { "date" } else { "tree" }}))
         }
         "view.sidebarSection" => {
             // {section, show?, collapsed?}: show or hide a section of the left sidebar, fold or

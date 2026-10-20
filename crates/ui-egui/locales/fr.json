@@ -2339,5 +2339,8 @@
   "CPU": "Processeur",
   "A face model uses the GPU only when a check shows it gives the same results faster.": "Un modèle de visages n’utilise le GPU que si une vérification montre qu’il donne les mêmes résultats plus vite.",
   "Checking the GPU for faces": "Vérification du GPU pour les visages",
-  "Copy Full Path": "Copier le chemin complet"
+  "Copy Full Path": "Copier le chemin complet",
+  "Sort Folders": "Trier les dossiers",
+  "Sort by Folder Tree": "Trier par arborescence",
+  "Sort by Date": "Trier par date"
 }

@@ -2334,5 +2334,8 @@
   "CPU": "ЦП",
   "A face model uses the GPU only when a check shows it gives the same results faster.": "Модель лиц использует ГП, только если проверка показала, что он даёт те же результаты быстрее.",
   "Checking the GPU for faces": "Проверка ГП для лиц",
-  "Copy Full Path": "Копировать полный путь"
+  "Copy Full Path": "Копировать полный путь",
+  "Sort Folders": "Сортировать папки",
+  "Sort by Folder Tree": "Сортировать по дереву папок",
+  "Sort by Date": "Сортировать по дате"
 }

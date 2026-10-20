@@ -32,7 +32,7 @@ use std::collections::BTreeMap;
 use std::sync::Arc;
 
 pub use dates::{DateRun, GroupBy};
-pub use folders::{FolderNode, FolderRecord};
+pub use folders::{DatedFolder, FolderNode, FolderRecord};
 pub use journal::{Journal, LoadReport, PersistStats, SnapshotPolicy, SnapshotTiming};
 pub use keywords::KeywordNode;
 use lightcraft_develop::DevelopSettings;

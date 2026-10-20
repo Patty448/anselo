@@ -2142,5 +2142,8 @@
   "CPU": "CPU",
   "A face model uses the GPU only when a check shows it gives the same results faster.": "只有在檢查顯示 GPU 能更快得出相同結果時，臉孔模型才會使用 GPU。",
   "Checking the GPU for faces": "正在檢查用於臉孔的 GPU",
-  "Copy Full Path": "複製完整路徑"
+  "Copy Full Path": "複製完整路徑",
+  "Sort Folders": "排序資料夾",
+  "Sort by Folder Tree": "按資料夾樹狀結構排序",
+  "Sort by Date": "按日期排序"
 }

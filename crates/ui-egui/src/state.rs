@@ -177,6 +177,17 @@ pub enum GridBadges {
     Never,
 }
 
+/// How the left sidebar's Folders section lists the library's folders.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum FolderSort {
+    /// Disks and the folders inside them, by name.
+    #[default]
+    Tree,
+    /// One flat row per folder holding photos, newest photo first, under year headings.
+    Date,
+}
+
 /// The loupe's info overlay (Cmd+I cycles; I in the full-screen preview).
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -707,6 +718,9 @@ pub struct UiState {
     pub grid_info: String,
     /// Photo counts next to sources and albums in the left panel.
     pub show_counts: bool,
+    /// How the Folders section lists folders (`view.folderSort`).
+    #[serde(deserialize_with = "lenient")]
+    pub folder_sort: FolderSort,
     /// Face / pet boxes (read from XMP) over the photo in the loupe.
     pub face_boxes: bool,
     /// The left sidebar's sections: their order, which are hidden and which are folded shut.
@@ -1306,6 +1320,7 @@ impl Default for UiState {
             show_filenames: true,
             grid_info: "filename".into(),
             show_counts: true,
+            folder_sort: FolderSort::Tree,
             face_boxes: true,
             sidebar: Default::default(),
             collapsed_sidebar: Vec::new(),

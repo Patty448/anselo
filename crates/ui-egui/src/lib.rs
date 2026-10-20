@@ -96,6 +96,8 @@ mod tests_focus_point;
 #[cfg(test)]
 mod tests_folder_drop;
 #[cfg(test)]
+mod tests_folder_sort;
+#[cfg(test)]
 mod tests_grading;
 #[cfg(test)]
 mod tests_grid;
@@ -1647,6 +1649,7 @@ pub struct Caches {
     /// The Keyword List's tick boxes, by library revision and selection.
     keyword_ticks: Option<(u64, u64, std::sync::Arc<panels::keyword_list::Ticks>)>,
     folder_tree: Option<(u64, std::sync::Arc<Vec<lightcraft_catalog::FolderNode>>)>,
+    folders_by_date: Option<(u64, std::sync::Arc<Vec<lightcraft_catalog::DatedFolder>>)>,
     people: Option<(u64, lightcraft_catalog::Filter, std::sync::Arc<Vec<lightcraft_catalog::Person>>)>,
     suggestions: Option<(u64, std::sync::Arc<Vec<String>>)>,
     /// What the Add keyword box offers for the text typed in it, by library revision, the
@@ -1748,6 +1751,7 @@ const READS_FILE: lightcraft_catalog::Aspects = lightcraft_catalog::Aspects::PRE
 const READS_META: lightcraft_catalog::Aspects = lightcraft_catalog::Aspects::PRESENCE.with(lightcraft_catalog::Aspects::META);
 const READS_PEOPLE: lightcraft_catalog::Aspects = READS_META.with(lightcraft_catalog::Aspects::ANALYSIS);
 const READS_CAPTURED: lightcraft_catalog::Aspects = lightcraft_catalog::Aspects::PRESENCE.with(lightcraft_catalog::Aspects::CAPTURED);
+const READS_FILE_DATE: lightcraft_catalog::Aspects = READS_FILE.with(lightcraft_catalog::Aspects::CAPTURED);
 const READS_FLAG: lightcraft_catalog::Aspects = lightcraft_catalog::Aspects::PRESENCE.with(lightcraft_catalog::Aspects::FLAG);
 
 impl Caches {
@@ -1756,6 +1760,13 @@ impl Caches {
         let kept = self.folder_tree.take().filter(|(r, _)| still_right(cat, *r, READS_FILE)).map(|(_, t)| t);
         let t = kept.unwrap_or_else(|| std::sync::Arc::new(cat.folder_tree()));
         self.folder_tree = Some((cat.revision, t.clone()));
+        t
+    }
+    /// The library's folders newest first (Folders ▸ Sort by Date).
+    pub fn folders_by_date(&mut self, cat: &lightcraft_catalog::Catalog) -> std::sync::Arc<Vec<lightcraft_catalog::DatedFolder>> {
+        let kept = self.folders_by_date.take().filter(|(r, _)| still_right(cat, *r, READS_FILE_DATE)).map(|(_, t)| t);
+        let t = kept.unwrap_or_else(|| std::sync::Arc::new(cat.folders_by_date()));
+        self.folders_by_date = Some((cat.revision, t.clone()));
         t
     }
     /// The library's keyword tree.

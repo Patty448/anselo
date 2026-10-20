@@ -2341,5 +2341,8 @@
   "CPU": "CPU",
   "A face model uses the GPU only when a check shows it gives the same results faster.": "Un modelo de caras usa la GPU solo cuando una comprobación muestra que da los mismos resultados más rápido.",
   "Checking the GPU for faces": "Comprobando la GPU para las caras",
-  "Copy Full Path": "Copiar ruta completa"
+  "Copy Full Path": "Copiar ruta completa",
+  "Sort Folders": "Ordenar carpetas",
+  "Sort by Folder Tree": "Ordenar por árbol de carpetas",
+  "Sort by Date": "Ordenar por fecha"
 }

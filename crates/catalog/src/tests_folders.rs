@@ -419,3 +419,75 @@ fn the_quick_check_agrees_with_the_careful_one() {
         }
     }
 }
+
+/// `(name, date)` of each Sort by Date row.
+fn by_date(c: &Catalog) -> Vec<(String, Option<String>)> {
+    c.folders_by_date().into_iter().map(|d| (d.folder.name, d.date)).collect()
+}
+
+fn shot(c: &mut Catalog, path: &str, captured: Option<&str>) {
+    add_with(c, path, |p| p.captured = captured.map(String::from));
+}
+
+#[test]
+fn sort_by_date_lists_folders_with_photos_newest_first() {
+    let mut c = Catalog::new();
+    shot(&mut c, "/p/2019/old/a.jpg", Some("2019-05-01T10:00:00"));
+    shot(&mut c, "/p/2024/trip/a.jpg", Some("2024-03-01T10:00:00"));
+    // the folder's latest photo dates it, not its first
+    shot(&mut c, "/p/2019/mixed/a.jpg", Some("2018-01-01T10:00:00"));
+    shot(&mut c, "/p/2019/mixed/b.jpg", Some("2025-07-01T10:00:00"));
+    let rows = by_date(&c);
+    assert_eq!(
+        rows,
+        vec![
+            ("mixed".into(), Some("2025-07-01T10:00:00".into())),
+            ("trip".into(), Some("2024-03-01T10:00:00".into())),
+            ("old".into(), Some("2019-05-01T10:00:00".into())),
+        ],
+        "folders holding nothing themselves (/p, /p/2019) are not rows"
+    );
+    let years: Vec<_> = c.folders_by_date().iter().map(|d| d.year().map(String::from)).collect();
+    assert_eq!(years, [Some("2025".into()), Some("2024".into()), Some("2019".into())]);
+}
+
+#[test]
+fn sort_by_date_keeps_the_rows_counts_and_drops_their_children() {
+    let mut c = Catalog::new();
+    shot(&mut c, "/p/trip/a.jpg", Some("2024-03-01T10:00:00"));
+    shot(&mut c, "/p/trip/day2/b.jpg", Some("2024-03-02T10:00:00"));
+    let rows = c.folders_by_date();
+    let trip = rows.iter().find(|d| d.folder.name == "trip").unwrap();
+    // choosing it shows its subfolder's photo too, so the count says so
+    assert_eq!((trip.folder.count, trip.folder.own), (2, 1));
+    assert!(rows.iter().all(|d| d.folder.children.is_empty()));
+    assert_eq!(rows[0].folder.name, "day2");
+}
+
+#[test]
+fn sort_by_date_puts_undated_and_malformed_folders_last_by_name() {
+    let mut c = Catalog::new();
+    shot(&mut c, "/p/Zebra/a.jpg", None);
+    shot(&mut c, "/p/apple/a.jpg", Some("garbage"));
+    // a non-ASCII capture time must not be sliced mid-character
+    shot(&mut c, "/p/émoji/a.jpg", Some("2é24-01-01"));
+    shot(&mut c, "/p/dated/a.jpg", Some("2020-01-01T00:00:00"));
+    // a malformed time beside a good one doesn't hide the good one
+    shot(&mut c, "/p/dated/b.jpg", Some("zzzz"));
+    let rows = by_date(&c);
+    assert_eq!(
+        rows,
+        vec![("dated".into(), Some("2020-01-01T00:00:00".into())), ("apple".into(), None), ("Zebra".into(), None), ("émoji".into(), None),]
+    );
+}
+
+#[test]
+fn sort_by_date_counts_one_folder_however_spelled_and_skips_deleted() {
+    let mut c = Catalog::new();
+    shot(&mut c, "/p/trip/a.jpg", Some("2020-01-01T00:00:00"));
+    shot(&mut c, "/p//trip/b.jpg", Some("2021-01-01T00:00:00"));
+    let gone = add_with(&mut c, "/p/gone/a.jpg", |p| p.captured = Some("2030-01-01T00:00:00".into()));
+    c.apply(Op::SetDeleted { id: gone, deleted: true }).unwrap();
+    assert_eq!(by_date(&c), vec![("trip".into(), Some("2021-01-01T00:00:00".into()))]);
+    assert!(Catalog::new().folders_by_date().is_empty());
+}

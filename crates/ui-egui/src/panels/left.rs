@@ -536,6 +536,20 @@ fn sections_menu(app: &mut LightcraftApp, ui: &mut egui::Ui, on: Option<SidebarS
             }
         }
         ui.separator();
+        if section == SidebarSection::Folders {
+            use crate::state::FolderSort;
+            for (sort, label, widget) in [
+                (FolderSort::Tree, "Sort by Folder Tree", "sidebarMenu:folderSort:tree"),
+                (FolderSort::Date, "Sort by Date", "sidebarMenu:folderSort:date"),
+            ] {
+                let item = ui.radio(app.ui.folder_sort == sort, crate::i18n::tr(label));
+                register(ui.ctx(), widget, item.rect);
+                if item.clicked() {
+                    run = Some(("view.folderSort", json!({"sort": if sort == FolderSort::Date { "date" } else { "tree" }})));
+                }
+            }
+            ui.separator();
+        }
     }
     for s in app.ui.sidebar.sections().iter().filter(|s| s.id.available()) {
         let shown = ui.selectable_label(!s.hidden, crate::i18n::tr(s.id.title()));
@@ -687,6 +701,10 @@ pub fn show(app: &mut LightcraftApp, ui: &mut egui::Ui) {
                     SidebarSection::ByDate => {
                         let rows = app.caches.date_groups(&app.session.catalog).len();
                         section(app, ui, s, rows, date_rows)
+                    }
+                    SidebarSection::Folders if app.ui.folder_sort == crate::state::FolderSort::Date => {
+                        let rows = app.caches.folders_by_date(&app.session.catalog);
+                        section(app, ui, s, rows.len(), |app, ui| folder_date_rows(app, ui, &rows))
                     }
                     SidebarSection::Folders => {
                         let tree = app.caches.folder_tree(&app.session.catalog);
@@ -1752,6 +1770,42 @@ fn folder_rows(app: &mut LightcraftApp, ui: &mut egui::Ui, nodes: &[FolderNode],
         if open && !n.children.is_empty() {
             folder_rows(app, ui, &n.children, indent + 16.0);
         }
+    }
+}
+
+/// Folders ▸ Sort by Date: one row per folder holding photos, newest first, under a heading for
+/// each year (and "Unknown Date" for the folders none of whose photos has a capture time).
+fn folder_date_rows(app: &mut LightcraftApp, ui: &mut egui::Ui, rows: &[lightcraft_catalog::DatedFolder]) {
+    let mut heading: Option<Option<&str>> = None;
+    for d in rows {
+        let year = d.year();
+        if heading != Some(year) {
+            heading = Some(year);
+            folder_year_heading(ui, year);
+        }
+        let n = &d.folder;
+        let id = format!("libfolder:{}", n.path);
+        if !out_of_sight(app, ui, &id, &n.name, Some(n.count), 0.0, n.label.is_some()) {
+            // rows here have no children, so there is nothing to open
+            let open_id = egui::Id::new(("libfolder-date-open", lightcraft_catalog::query::folder_key(&n.path)));
+            let mut open = false;
+            folder_row(app, ui, n, &id, &n.name, 0.0, open_id, &mut open);
+        }
+    }
+}
+
+/// A year's heading among [`folder_date_rows`] (`None`: Unknown Date), registered as
+/// `folderYear:<year>` (`folderYear:none`).
+fn folder_year_heading(ui: &mut egui::Ui, year: Option<&str>) {
+    let t = Tokens::get(ui.ctx());
+    let (r, _) = ui.allocate_exact_size(vec2(ui.available_width(), ROW_HEIGHT), Sense::hover());
+    let label = match year {
+        Some(y) => y.to_string(),
+        None => crate::i18n::tr("Unknown Date").to_string(),
+    };
+    register(ui.ctx(), format!("folderYear:{}", year.unwrap_or("none")), r);
+    if ui.is_rect_visible(r) {
+        ui.painter().text(pos2(r.left() + 18.0, r.center().y), Align2::LEFT_CENTER, label, t.semibold(12.5), t.text_dim);
     }
 }
 

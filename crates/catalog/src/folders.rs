@@ -282,6 +282,69 @@ impl Catalog {
         mark_selectable(&mut tree, &mounts);
         tree
     }
+    /// The folders that hold photos of their own, newest first (Folders ▸ Sort by Date). A
+    /// folder's date is the latest capture time among the photos directly in it; folders none of
+    /// whose photos has a usable capture time (none, or one that does not start with a year)
+    /// come last, by name. Each row is its [`FolderNode`] from [`Self::folder_tree`] without its
+    /// children: its count still includes the folders inside it, as choosing it shows them too.
+    pub fn folders_by_date(&self) -> Vec<DatedFolder> {
+        // latest capture per containing folder, by identity (the same split as `folder_tree`)
+        let mut latest: HashMap<String, &str> = HashMap::new();
+        for p in self.photos().filter(|p| p.in_library()) {
+            if let Source::File { path } = &p.source
+                && let Some(i) = path.rfind(['/', '\\'])
+                && let Some(dir) = path.get(..i.max(1))
+                && let Some(c) = p.captured.as_deref().filter(|c| dated(c))
+            {
+                let e = latest.entry(folder_key(dir)).or_insert(c);
+                if c > *e {
+                    *e = c;
+                }
+            }
+        }
+        let mut out = Vec::new();
+        let mut stack: Vec<FolderNode> = self.folder_tree();
+        // depth is bounded by `MAX_DEPTH` (the tree is built that way)
+        while let Some(mut n) = stack.pop() {
+            stack.append(&mut n.children);
+            if n.own > 0 {
+                let date = latest.get(&folder_key(&n.path)).map(|d| d.to_string());
+                out.push(DatedFolder { folder: n, date });
+            }
+        }
+        out.sort_by(|a, b| {
+            let by_name = || a.folder.name.to_lowercase().cmp(&b.folder.name.to_lowercase()).then_with(|| a.folder.path.cmp(&b.folder.path));
+            match (&a.date, &b.date) {
+                (Some(x), Some(y)) => y.cmp(x).then_with(by_name),
+                (Some(_), None) => std::cmp::Ordering::Less,
+                (None, Some(_)) => std::cmp::Ordering::Greater,
+                (None, None) => by_name(),
+            }
+        });
+        out
+    }
+}
+
+/// A row of Folders ▸ Sort by Date (see [`Catalog::folders_by_date`]).
+#[derive(Clone, Debug, PartialEq, Serialize)]
+pub struct DatedFolder {
+    pub folder: FolderNode,
+    /// The latest capture time (ISO 8601, as stored) of the photos directly in the folder; `None`
+    /// when none has one ("No Date").
+    pub date: Option<String>,
+}
+
+impl DatedFolder {
+    /// The year heading the row goes under; `None` for "No Date".
+    pub fn year(&self) -> Option<&str> {
+        self.date.as_deref().and_then(|d| d.get(..4))
+    }
+}
+
+/// Whether a stored capture time can date a folder: it starts with a four-digit year. A corrupt
+/// or foreign one (a Lightroom catalog's captureTime is copied verbatim) counts as no date.
+fn dated(captured: &str) -> bool {
+    captured.get(..4).is_some_and(|y| y.bytes().all(|b| b.is_ascii_digit()))
 }
 
 /// The node for `key` with everything below it (at most [`MAX_DEPTH`] deep).

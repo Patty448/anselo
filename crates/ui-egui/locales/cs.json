@@ -2064,5 +2064,8 @@
   "Select none": "Zrušit celý výběr",
   "Select all": "Vybrat vše",
   "Visualize HDR": "Zobrazit rozsah HDR",
-  "Copy Full Path": "Kopírovat úplnou cestu"
+  "Copy Full Path": "Kopírovat úplnou cestu",
+  "Sort Folders": "Seřadit složky",
+  "Sort by Folder Tree": "Seřadit podle stromu složek",
+  "Sort by Date": "Seřadit podle data"
 }

@@ -1230,6 +1230,9 @@ pub fn context_menu(app: &mut LightcraftApp, ui: &mut egui::Ui, id: PhotoId) {
     if ui.add_enabled(crate::menus::ui_enabled(app, "app.showInFinder"), egui::Button::new(crate::i18n::tr(crate::menus::reveal_label()))).clicked() {
         let _ = app.run("app.showInFinder", json!({}));
     }
+    if ui.add_enabled(crate::menus::ui_enabled(app, "app.copyPath"), egui::Button::new(crate::i18n::tr("Copy Full Path"))).clicked() {
+        let _ = app.run("app.copyPath", json!({}));
+    }
     if ui.button(crate::i18n::tr("Export…")).clicked() {
         let _ = app.run("dialog.export", json!({}));
     }

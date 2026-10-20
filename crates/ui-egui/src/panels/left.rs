@@ -1108,6 +1108,9 @@ fn folder_tree(
         {
             let _ = f(path);
         }
+        if ui.button(crate::i18n::tr("Copy Full Path")).clicked() {
+            let _ = app.run("app.copyPath", json!({"paths": [path]}));
+        }
         if let Some(held) = &held {
             synchronize_item(app, ui, &held.0, &held.1);
         }
@@ -2068,6 +2071,10 @@ fn folder_menu_for_library(app: &mut LightcraftApp, resp: &egui::Response, n: &F
             && let Some(f) = app.services.reveal.as_mut()
         {
             let _ = f(path);
+            ui.close();
+        }
+        if ui.button(crate::i18n::tr("Copy Full Path")).clicked() {
+            let _ = app.run("app.copyPath", json!({"paths": [path]}));
             ui.close();
         }
         folder_label_menu(app, ui, n);

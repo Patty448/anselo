@@ -212,6 +212,7 @@ const LAYOUT: &[(&str, &[&str])] = &[
             "photo.reload",
             "photo.readFocusPoints",
             "app.showInFinder",
+            "app.copyPath",
             "dialog.rename",
             "dialog.captureTime",
             "photo.tagFromTracklog",

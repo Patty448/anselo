@@ -68,6 +68,8 @@ mod tests_compare;
 #[cfg(test)]
 mod tests_copy_paste_dialogs;
 #[cfg(test)]
+mod tests_copy_path;
+#[cfg(test)]
 mod tests_crop_rotate;
 #[cfg(test)]
 mod tests_crop_tool;
@@ -376,6 +378,9 @@ pub struct LightcraftApp {
     pub synthetic: Vec<egui::Event>,
     /// The text the UI last put on the clipboard (`ui.inspect` → `copied`).
     pub copied: Option<String>,
+    /// Text a command asked to put on the clipboard (commands run without the egui context); handed
+    /// to egui at the end of the frame.
+    pub copy_request: Option<String>,
     /// Native file dialogs up for commands (`pick`): each command runs again when its closes.
     pub(crate) pending_picks: Vec<pick::Pending>,
     /// Modifiers announced for synthetic input (held from a button down to its release).
@@ -506,6 +511,7 @@ impl LightcraftApp {
             shadow: None,
             synthetic: vec![],
             copied: None,
+            copy_request: None,
             pending_picks: vec![],
             synthetic_mods: egui::Modifiers::NONE,
             synthetic_mods_release: false,
@@ -1383,6 +1389,9 @@ impl LightcraftApp {
 
     /// Frame timings once layout is done (`t0`: when layout started).
     fn end_frame(&mut self, ctx: &egui::Context, t0: f64) {
+        if let Some(text) = self.copy_request.take() {
+            ctx.copy_text(text);
+        }
         ctx.output(|o| {
             for c in &o.commands {
                 if let egui::OutputCommand::CopyText(text) = c {

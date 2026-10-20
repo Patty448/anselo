@@ -1,6 +1,6 @@
 # Lightroom parity checklist
 
-> **Last reviewed:** 2026-10-10 · **Last updated:** 2026-10-15 · **Change:** minor (LRC-PRINT-PAGE: Print Page Options) · **Target:** Adobe Lightroom Classic 15.5 / Lightroom 9.6
+> **Last reviewed:** 2026-10-10 · **Last updated:** 2026-10-20 · **Change:** minor (MENU-PHOTO-COPYPATH: Copy Full Path) · **Target:** Adobe Lightroom Classic 15.5 / Lightroom 9.6
 
 The measured, row-by-row checklist: one row per Lightroom feature, menu item and shortcut, what we
 have and what is missing. It answers *does the feature exist?* (feature breadth). Whether it is good
@@ -50,12 +50,12 @@ cited here still exists. Formerly docs/parity.md.
 | V. Preferences (PREF) | 6 | 2 | 2 | 2 | 1/1 (100%) | 4/5 (80%) |
 | W. Cloud & AI infrastructure (CLOUD / AI) | 1 | 0 | 1 | 2 | — | — |
 | X. Cross-cutting behaviours (BEHAV) | 23 | 6 | 1 | 1 | 8/8 (100%) | 7/10 (70%) |
-| Y. Menus | 84 | 0 | 4 | 8 | 47/47 (100%) | 23/23 (100%) |
+| Y. Menus | 85 | 0 | 4 | 8 | 47/47 (100%) | 23/23 (100%) |
 | Z. Keyboard shortcuts (desktop) | 78 | 4 | 2 | 1 | 49/52 (94%) | 24/26 (92%) |
 | Lightroom Classic extras | 40 | 23 | 23 | 8 | — | 24/26 (92%) |
-| **Total** | 419 | 61 | 59 | 35 | 194/201 (97%) | 148/161 (92%) |
+| **Total** | 420 | 61 | 59 | 35 | 194/201 (97%) | 148/161 (92%) |
 
-Weighted completion (✅ = 1, 🟡 = ½, 🚫 left out): **83.4%** of 539 in-scope rows — P0 98.3% of 201 · P1 95.0% of 161 · P2 55.7% of 176.
+Weighted completion (✅ = 1, 🟡 = ½, 🚫 left out): **83.4%** of 540 in-scope rows — P0 98.3% of 201 · P1 95.0% of 161 · P2 55.9% of 177.
 <!-- /parity:summary -->
 
 ## Top gaps and shortcut notes
@@ -515,6 +515,7 @@ visible menu bar yet: the menu model is only exposed through the control channel
 | MENU-FILE-SHARE | Share / get link / invite | OOS | 🚫 | | |
 | MENU-FILE-PHOTOSHOP | Edit in external editor | P2 | ✅ | `cmd:photo.editInPhotoCraft`, `cmd:photo.editInExternal`, `cmd:photo.openOriginalInExternal` | Photo ▸ Edit In ▸ Edit in PhotoCraft / Edit in Other Editor / Open Original in Other Editor (RAW, no copy), and Edit In on a photo's right-click menu |
 | MENU-FILE-SHOWFINDER | Show in Finder | P0 | ✅ | `cmd:app.showInFinder` | ⌘R; Explorer on Windows, the folder on Linux; disabled for demo scenes and on the web |
+| MENU-PHOTO-COPYPATH | Copy Full Path | P2 | ✅ | `cmd:app.copyPath` | Photo menu and the photo right-click menu (grid, loupe, full screen, filmstrip, compare, survey): the selected originals, one path per line; a Folders or Local row's menu copies the folder. Beyond Lightroom (Picasa) |
 | MENU-FILE-OFFLINE | Store album locally | P2 | 🚫 | | not applicable: local-first |
 | MENU-FILE-CLOSE | Close Window | P1 | ✅ | `apps/lightcraft/src/native_menu.rs` | the system's Close Window item at the end of File (⌘W) |
 | MENU-EDIT-UNDO | Undo | P0 | ✅ | `cmd:edit.undo` | label does not name the step |
@@ -891,3 +892,4 @@ Latin stays upright. Advanced Japanese composition remains open. Regression cove
 | 2026-10-13 | minor | LRC-LIB-CATALOG-IMPORT review: offline Local promotion and result dismissal across library switches covered; redundant operation/settings copies removed. Status and summary counts unchanged. |
 | 2026-10-14 | patch | LRC-LIB-CATALOG-IMPORT: reconciled with upstream phased progress, cancellation kinds, WAL-only import, translations and current progress tracking. Status and summary counts unchanged. |
 | 2026-10-13 | minor | KEYC-COMPARE: `=` / `-` (also `+`) increase / decrease the grid thumbnail size (`view.thumbSizeUp` / `view.thumbSizeDown`, View menu), grids only; status unchanged (🟡) |
+| 2026-10-20 | minor | MENU-PHOTO-COPYPATH: Copy Full Path (`app.copyPath`) in the Photo menu, the photo right-click menu and the folder rows' menus; new row (✅) |

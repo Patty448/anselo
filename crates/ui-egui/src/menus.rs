@@ -257,6 +257,7 @@ pub const UI_COMMANDS: &[UiCommand] = &[
     ("app.resetShortcuts", "Reset All Keyboard Shortcuts", None, ""),
     ("app.export", "Export Now", None, ""),
     ("app.showInFinder", "Show in Finder", Some("Cmd+R"), "Photo"),
+    ("app.copyPath", "Copy Full Path", None, "Photo"),
     ("app.openSamModelFolder", "Show in File Manager", None, ""),
     ("dialog.rename", "Rename Photos…", Some("F2"), "Photo"),
     ("dialog.labelNames", "Edit Color Label Names…", None, ""),
@@ -2106,6 +2107,7 @@ pub fn run_ui_command(app: &mut LightcraftApp, id: &str, p: &Value) -> Option<Re
         }
         "app.export" => crate::control::export_active(app, p),
         "app.showInFinder" => show_in_finder(app),
+        "app.copyPath" => copy_path(app, p),
         "app.openLogFolder" => open_log_folder(app),
         "app.discord" | "app.website" | "app.github" | "app.artcraft" | "app.help" | "app.feedback" => {
             let url = crate::links::url_of(id).unwrap_or(crate::links::WEBSITE);
@@ -2160,6 +2162,7 @@ pub fn ui_enabled(app: &LightcraftApp, id: &str) -> bool {
                     .and_then(|id| app.session.catalog.photo(id))
                     .is_some_and(|p| matches!(p.source, lightcraft_engine::catalog::Source::File { .. }))
         }
+        "app.copyPath" => !file_paths(app).is_empty(),
         "app.openSamModelFolder" => app.session.segmenter.dir.is_some() && app.services.open_with.is_some(),
         "file.exportPresets" => app.session.presets.iter().any(|p| !p.builtin),
         "file.exportMaskEffects" => !app.session.mask_effects.is_empty(),
@@ -2287,6 +2290,40 @@ fn show_in_finder(app: &mut LightcraftApp) -> Result<Value, String> {
     let reveal = app.services.reveal.as_mut().ok_or("not available here")?;
     reveal(&path)?;
     Ok(json!({"path": path}))
+}
+
+/// The originals of the selected photos (the active one when nothing else is), in selection order;
+/// photos without a file (demo scenes) are left out.
+fn file_paths(app: &LightcraftApp) -> Vec<String> {
+    app.session
+        .selected()
+        .into_iter()
+        .filter_map(|id| match app.session.catalog.photo(id).map(|p| &p.source) {
+            Some(lightcraft_engine::catalog::Source::File { path }) => Some(path.clone()),
+            _ => None,
+        })
+        .collect()
+}
+
+/// Photo ▸ Copy Full Path: put the full paths of the selected photos' originals on the clipboard,
+/// one per line, or the `paths` given (a folder row's menu passes its folder).
+fn copy_path(app: &mut LightcraftApp, p: &Value) -> Result<Value, String> {
+    let paths: Vec<String> = match p.get("paths").and_then(Value::as_array) {
+        Some(given) => given.iter().filter_map(Value::as_str).filter(|s| !s.is_empty()).map(native_path).collect(),
+        None => file_paths(app),
+    };
+    if paths.is_empty() {
+        return Err("these photos have no file (demo scenes)".into());
+    }
+    let text = paths.join("\n");
+    app.copy_request = Some(text.clone());
+    Ok(json!({"text": text, "count": paths.len()}))
+}
+
+/// A path as the system writes it: folder paths are kept with forward slashes, Windows wants
+/// backslashes.
+fn native_path(path: &str) -> String {
+    if cfg!(windows) { path.replace('/', "\\") } else { path.to_string() }
 }
 
 /// Photo ▸ Edit In: render a copy of each selected photo with its edits (stacked on its original)

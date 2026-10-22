@@ -301,5 +301,9 @@
   "Folder scan: added {} photo{}": "Сканування тек: додано фото: {}{:.0}",
   "Inherit (from {from}: {mode})": "Успадкувати (від {from}: {mode})",
   "Can't watch “{folder}” for changes (system watch limit reached); it is checked every {minutes} min instead.": "Не вдається стежити за змінами в «{folder}» (досягнуто системного ліміту стеження); теку перевіряють кожні {minutes} хв.",
-  "Can't watch “{folder}” for changes; it is checked every {minutes} min instead.": "Не вдається стежити за змінами в «{folder}»; теку перевіряють кожні {minutes} хв."
+  "Can't watch “{folder}” for changes; it is checked every {minutes} min instead.": "Не вдається стежити за змінами в «{folder}»; теку перевіряють кожні {minutes} хв.",
+  "Inherited from {from}": "Успадковано від {from}",
+  "Not watched for changes ({why}); checked every {minutes} min instead.": "За змінами не стежать ({why}); теку перевіряють кожні {minutes} хв.",
+  "{n} more…": "Ще {n}…",
+  "Can't list this folder: {e}": "Не вдається показати вміст теки: {e}"
 }

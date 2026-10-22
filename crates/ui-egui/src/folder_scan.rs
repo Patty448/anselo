@@ -268,19 +268,29 @@ fn mode_name(m: ScanMode) -> &'static str {
 /// Set folder `path`'s scan mode from its menu: Once imports at once (in the background), Always
 /// scans, and Never asks whether the photos already in the library from it go too.
 pub fn choose(app: &mut LightcraftApp, ctx: &egui::Context, path: &str, name: &str, mode: Option<ScanMode>) {
+    if let Some(count) = set_mode(app, ctx, path, mode) {
+        app.ui.dialog = Some(crate::state::Dialog::NeverScan { path: path.to_string(), name: name.to_string(), count });
+    }
+}
+
+/// Set folder `path`'s scan mode (`None`: Inherit): Once imports at once (in the background) and
+/// Always scans. → for Never, the number of library photos in the folder when there are some
+/// (the caller asks whether they go too).
+pub fn set_mode(app: &mut LightcraftApp, ctx: &egui::Context, path: &str, mode: Option<ScanMode>) -> Option<usize> {
     let id = mode.map_or("inherit", ScanMode::as_str);
     let r = match app.run("folder.scanMode", json!({"path": path, "mode": id, "start": false})) {
         Ok(r) => r,
-        Err(e) => return app.toast(ctx, e),
+        Err(e) => {
+            app.toast(ctx, e);
+            return None;
+        }
     };
     if let Some(params) = r.get("import") {
         start_import(app, params.clone(), false);
     }
-    let in_library = r["inLibrary"].as_u64().map_or(0, |n| usize::try_from(n).unwrap_or(usize::MAX));
-    if mode == Some(ScanMode::Never) && in_library > 0 {
-        app.ui.dialog = Some(crate::state::Dialog::NeverScan { path: path.to_string(), name: name.to_string(), count: in_library });
-    }
     if mode == Some(ScanMode::Always) {
         app.folder_scans.request();
     }
+    let in_library = r["inLibrary"].as_u64().map_or(0, |n| usize::try_from(n).unwrap_or(usize::MAX));
+    (mode == Some(ScanMode::Never) && in_library > 0).then_some(in_library)
 }

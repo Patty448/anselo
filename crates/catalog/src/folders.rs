@@ -207,7 +207,7 @@ struct Placed {
 
 /// A gvfs mount's name made readable: `smb-share:server=tokyo,share=photos` → `photos on tokyo`;
 /// any other (`sftp:host=nas`) as it is.
-fn mount_name(n: &str) -> String {
+pub fn mount_name(n: &str) -> String {
     let field = |key: &str| {
         let rest = n.strip_prefix("smb-share:")?;
         rest.split(',').find_map(|kv| kv.strip_prefix(key)?.strip_prefix('=')).filter(|v| !v.is_empty())

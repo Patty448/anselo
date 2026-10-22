@@ -351,6 +351,8 @@ pub const SCAN_MIN_LONG_EDGE: u32 = 300;
 pub const SCAN_RESCAN_MINUTES: u32 = 30;
 /// The longest rescan interval that can be set (a day).
 pub const SCAN_RESCAN_MAX_MINUTES: u32 = 24 * 60;
+/// The largest minimum long edge that can be set (pixels).
+pub const MAX_MIN_LONG_EDGE: u32 = 100_000;
 
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase")]

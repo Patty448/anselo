@@ -371,6 +371,15 @@ fn import_tab(app: &mut LightcraftApp, ui: &mut egui::Ui, t: &Tokens) {
         if check(ui, "settings.importOnCard", &mut on_card, "Show the import review when a camera or card is connected") {
             let _ = app.run("library.preferences", json!({"import": {"showOnCard": on_card}}));
         }
+        heading(ui, t, crate::i18n::tr("Folder Scans"));
+        hint(ui, t, crate::i18n::tr("Folders set to Always are looked through for new photos, which are added where they are."));
+        row(ui, t, "", |ui| {
+            let r = ui.button(crate::i18n::tr("Folder Manager…"));
+            register(ui.ctx(), "button:settingsFolderManager", r.rect);
+            if r.clicked() {
+                app.ui.dialog = Some(crate::state::Dialog::FolderManager);
+            }
+        });
         heading(ui, t, crate::i18n::tr("Auto Import"));
         hint(ui, t, crate::i18n::tr("Photos that arrive in this folder (tethering, a scanner, a sync app) are added as soon as they're complete."));
         row(ui, t, crate::i18n::tr("Watched folder"), |ui| {

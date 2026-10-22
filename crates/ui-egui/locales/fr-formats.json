@@ -301,5 +301,9 @@
   "Folder scan: added {} photo{}": "Analyse des dossiers : {} photo{} ajoutée(s)",
   "Inherit (from {from}: {mode})": "Hériter (de {from} : {mode})",
   "Can't watch “{folder}” for changes (system watch limit reached); it is checked every {minutes} min instead.": "Impossible de surveiller les changements dans « {folder} » (limite de surveillance du système atteinte) ; il est vérifié toutes les {minutes} min à la place.",
-  "Can't watch “{folder}” for changes; it is checked every {minutes} min instead.": "Impossible de surveiller les changements dans « {folder} » ; il est vérifié toutes les {minutes} min à la place."
+  "Can't watch “{folder}” for changes; it is checked every {minutes} min instead.": "Impossible de surveiller les changements dans « {folder} » ; il est vérifié toutes les {minutes} min à la place.",
+  "Inherited from {from}": "Hérité de {from}",
+  "Not watched for changes ({why}); checked every {minutes} min instead.": "Changements non surveillés ({why}) ; vérifié toutes les {minutes} min à la place.",
+  "{n} more…": "{n} de plus…",
+  "Can't list this folder: {e}": "Impossible de lister ce dossier : {e}"
 }

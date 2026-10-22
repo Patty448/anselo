@@ -1241,6 +1241,9 @@ pub enum Dialog {
         name: String,
         count: usize,
     },
+    /// The Folder Manager: every folder's scan mode, and the scan settings (its tree is kept in
+    /// [`crate::folder_manager::FolderManager`]).
+    FolderManager,
     /// Synchronize Folder: what changed in a library folder on disk, and what to do about it
     /// (`folder.synchronize`; the scan runs in [`crate::sync`]).
     SynchronizeFolder {

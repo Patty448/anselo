@@ -2350,5 +2350,22 @@
   "Once: add the photos in this folder now; later ones are not looked for": "Однократно: добавить фото из этой папки сейчас; новые не ищутся",
   "Always: add new photos in this folder whenever the folders are scanned": "Всегда: добавлять новые фото из этой папки при каждом сканировании папок",
   "Inherit: as the folder above says": "Наследовать: как у папки выше",
-  "Watching folders for changes": "Отслеживание изменений в папках"
+  "Watching folders for changes": "Отслеживание изменений в папках",
+  "Inherit": "Наследовать",
+  "Refresh": "Обновить",
+  "Loading…": "Загрузка…",
+  "Computer": "Компьютер",
+  "Show hidden folders": "Показывать скрытые папки",
+  "Not scanned": "Не сканируется",
+  "Polling": "Периодическая проверка",
+  "Default: system and app folders are never scanned": "По умолчанию: системные папки и папки приложений никогда не сканируются",
+  "Skip images smaller than": "Пропускать изображения меньше",
+  "Rescan every": "Повторять сканирование каждые",
+  "Rescan Now": "Сканировать сейчас",
+  "Looks for new photos in the folders set to Always.": "Ищет новые фото в папках с режимом «Всегда».",
+  "Choose where the library looks for new photos by itself. A folder without a choice of its own follows the folder it is in.": "Выберите, где библиотека сама ищет новые фото. Папка без собственного выбора следует за папкой, в которой находится.",
+  "Folder Manager": "Диспетчер папок",
+  "Folder Manager…": "Диспетчер папок…",
+  "Folder Scans": "Сканирование папок",
+  "Folders set to Always are looked through for new photos, which are added where they are.": "В папках с режимом «Всегда» ищутся новые фото; они добавляются там, где лежат."
 }

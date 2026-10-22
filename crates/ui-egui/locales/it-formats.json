@@ -301,5 +301,9 @@
   "Folder scan: added {} photo{}": "Scansione cartelle: {} foto aggiunte{:.0}",
   "Inherit (from {from}: {mode})": "Eredita (da {from}: {mode})",
   "Can't watch “{folder}” for changes (system watch limit reached); it is checked every {minutes} min instead.": "Impossibile controllare le modifiche in «{folder}» (raggiunto il limite di controllo del sistema); viene verificata ogni {minutes} min.",
-  "Can't watch “{folder}” for changes; it is checked every {minutes} min instead.": "Impossibile controllare le modifiche in «{folder}»; viene verificata ogni {minutes} min."
+  "Can't watch “{folder}” for changes; it is checked every {minutes} min instead.": "Impossibile controllare le modifiche in «{folder}»; viene verificata ogni {minutes} min.",
+  "Inherited from {from}": "Ereditato da {from}",
+  "Not watched for changes ({why}); checked every {minutes} min instead.": "Modifiche non controllate ({why}); verificata ogni {minutes} min.",
+  "{n} more…": "Altre {n}…",
+  "Can't list this folder: {e}": "Impossibile elencare questa cartella: {e}"
 }

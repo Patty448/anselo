@@ -301,5 +301,9 @@
   "Folder scan: added {} photo{}": "文件夹扫描：已添加 {} 张照片{:.0}",
   "Inherit (from {from}: {mode})": "继承（来自 {from}：{mode}）",
   "Can't watch “{folder}” for changes (system watch limit reached); it is checked every {minutes} min instead.": "无法监视“{folder}”的更改（已达到系统监视上限）；改为每 {minutes} 分钟检查一次。",
-  "Can't watch “{folder}” for changes; it is checked every {minutes} min instead.": "无法监视“{folder}”的更改；改为每 {minutes} 分钟检查一次。"
+  "Can't watch “{folder}” for changes; it is checked every {minutes} min instead.": "无法监视“{folder}”的更改；改为每 {minutes} 分钟检查一次。",
+  "Inherited from {from}": "继承自 {from}",
+  "Not watched for changes ({why}); checked every {minutes} min instead.": "未监视更改（{why}）；改为每 {minutes} 分钟检查一次。",
+  "{n} more…": "还有 {n} 个…",
+  "Can't list this folder: {e}": "无法列出此文件夹：{e}"
 }

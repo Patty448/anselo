@@ -217,6 +217,8 @@ pub const UI_COMMANDS: &[UiCommand] = &[
     ("merge.hdrPanoramaLast", "HDR Panorama with Last Settings", None, "Photo>Photo Merge"),
     ("file.addPhotos", "Import Photos…", Some("Cmd+Shift+I"), "File"),
     ("file.addFolder", "Import from Folder…", None, "File"),
+    // every folder's scan mode (Never / Once / Always) and the scan settings; desktop only
+    ("dialog.folderManager", "Folder Manager…", None, "File"),
     ("file.importLightroom", "Import Lightroom Catalog…", None, "File"),
     ("file.addFromDevice", "Import from Device", None, ""),
     ("file.findMissing", "Find Missing Photos…", None, "File"),
@@ -1281,6 +1283,13 @@ pub fn run_ui_command(app: &mut LightcraftApp, id: &str, p: &Value) -> Option<Re
             });
             Ok(Value::Null)
         }
+        "dialog.folderManager" => {
+            if cfg!(target_arch = "wasm32") {
+                return Some(Err("the Folder Manager is in the desktop app only (the browser has no folders to scan)".into()));
+            }
+            app.ui.dialog = Some(Dialog::FolderManager);
+            Ok(Value::Null)
+        }
         "dialog.autoStack" => {
             app.ui.dialog = Some(Dialog::AutoStack { gap: p.get("gap").and_then(Value::as_f64).unwrap_or(60.0) as f32 });
             Ok(Value::Null)
@@ -2187,6 +2196,7 @@ pub fn ui_enabled(app: &LightcraftApp, id: &str) -> bool {
         "app.openLibrary" | "app.newLibrary" => app.services.pick_folder.is_some() && crate::panels::settings::can_switch_library(app).is_ok(),
         "file.addFolder" => app.services.pick_folder.is_some() && !crate::lightroom_import::is_running(app),
         "file.backupLibrary" => app.services.backup_library.is_some(),
+        "dialog.folderManager" => !cfg!(target_arch = "wasm32"),
         "app.openLogFolder" => app.services.reveal.is_some() && app.services.log_file.is_some(),
         "file.restoreLibrary" => app.services.restore_library.is_some(),
         "app.clearRecentLibraries" => !app.ui.settings.recent_libraries.is_empty(),

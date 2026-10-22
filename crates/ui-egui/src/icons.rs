@@ -103,6 +103,12 @@ pub enum Icon {
     Sun,
     /// Appearance Mode ▸ Dark: a crescent moon.
     Moon,
+    /// Folder scan mode Never: a circle struck through.
+    ScanNever,
+    /// Folder scan mode Once: an arrow down into a tray.
+    ScanOnce,
+    /// Folder scan mode Always: a circling arrow.
+    ScanAlways,
 }
 
 struct Pen<'a> {
@@ -223,6 +229,20 @@ fn paint_with(p: &Painter, rect: Rect, icon: Icon, color: Color32, turn: Option<
             // outer arc of the disc, then the inner arc of the bite, meeting at the horns
             pen.arc(10.0, 10.0, 6.5, 2.9, 263.8);
             pen.arc(13.4, 6.4, 5.0, 214.9, 51.8);
+        }
+        ScanNever => {
+            pen.circle(10.0, 10.0, 6.5);
+            pen.line(&[(5.4, 14.6), (14.6, 5.4)]);
+        }
+        ScanOnce => {
+            pen.line(&[(10.0, 3.0), (10.0, 12.0)]);
+            pen.line(&[(6.5, 8.5), (10.0, 12.0), (13.5, 8.5)]);
+            pen.line(&[(3.5, 13.0), (3.5, 16.5), (16.5, 16.5), (16.5, 13.0)]);
+        }
+        ScanAlways => {
+            // most of a circle, its end (upper right, turning clockwise) an arrowhead
+            pen.arc(10.0, 10.0, 6.5, 40.0, 320.0);
+            pen.line(&[(11.1, 5.1), (15.0, 5.8), (15.0, 1.9)]);
         }
         Search => {
             pen.circle(8.5, 8.5, 5.0);

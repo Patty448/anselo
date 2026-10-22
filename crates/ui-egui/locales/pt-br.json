@@ -2203,5 +2203,22 @@
   "Once: add the photos in this folder now; later ones are not looked for": "Uma vez: adicionar agora as fotos desta pasta; as posteriores não são procuradas",
   "Always: add new photos in this folder whenever the folders are scanned": "Sempre: adicionar as fotos novas desta pasta a cada varredura das pastas",
   "Inherit: as the folder above says": "Herdar: como a pasta acima",
-  "Watching folders for changes": "Observando mudanças nas pastas"
+  "Watching folders for changes": "Observando mudanças nas pastas",
+  "Inherit": "Herdar",
+  "Refresh": "Atualizar",
+  "Loading…": "Carregando…",
+  "Computer": "Computador",
+  "Show hidden folders": "Mostrar pastas ocultas",
+  "Not scanned": "Sem varredura",
+  "Polling": "Verificação periódica",
+  "Default: system and app folders are never scanned": "Padrão: pastas do sistema e de aplicativos nunca passam por varredura",
+  "Skip images smaller than": "Ignorar imagens menores que",
+  "Rescan every": "Nova varredura a cada",
+  "Rescan Now": "Varrer agora",
+  "Looks for new photos in the folders set to Always.": "Procura fotos novas nas pastas definidas como Sempre.",
+  "Choose where the library looks for new photos by itself. A folder without a choice of its own follows the folder it is in.": "Escolha onde a biblioteca procura fotos novas sozinha. Uma pasta sem escolha própria segue a pasta em que está.",
+  "Folder Manager": "Gerenciador de pastas",
+  "Folder Manager…": "Gerenciador de pastas…",
+  "Folder Scans": "Varredura de pastas",
+  "Folders set to Always are looked through for new photos, which are added where they are.": "Nas pastas definidas como Sempre são procuradas fotos novas, adicionadas onde estão."
 }

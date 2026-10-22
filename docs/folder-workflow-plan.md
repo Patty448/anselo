@@ -1,6 +1,6 @@
 # Folder workflow plan (Picasa-style)
 
-> **Last updated:** 2026-10-22 · **Status:** Phases 1 (`b5d34059`), 2 (`4a3c7780`) and 3 (`228bd5f1`, `0694245c`) committed; Phase 4 done (commit `LRC-LIB-FOLDERS-WATCH`); Phase 5 not started · **Branch:** `folder-workflow`
+> **Last updated:** 2026-10-22 · **Status:** Phases 1 (`b5d34059`), 2 (`4a3c7780`) and 3 (`228bd5f1`, `0694245c`) committed; Phase 4 (`2e85759f`) and Phase 5 (commit `LRC-LIB-FOLDERS-MANAGER`) done: the plan is complete · **Branch:** `folder-workflow`
 
 ## Status / handoff
 
@@ -23,7 +23,7 @@
   - UI: `crates/ui-egui/src/folder_scan.rs` (`FolderScans`, `tick`, `scan_menu`, `choose`), `Dialog::NeverScan`, `ImportTask::folder_scan()`. Tests: `catalog/src/tests_folder_scan.rs` (6), `engine/src/tests_folder_scan.rs` (8), `ui-egui/src/tests_folder_scan.rs` (3).
   - Checked by eye with headless snapshots (`lightcraft-cli snapshot --library … --script …`): the Scan submenu, and the Never dialog. Not tried in the windowed app.
   - Snapshot tip: a Folders row that leads to one folder opens by itself; clicking its toggle closes it.
-- **Phase 4, folder watching: committed as `LRC-LIB-FOLDERS-WATCH`** (new parity row, ✅), after a green `RUST_TEST_THREADS=2 cargo xtask ci`. The user approved `notify` 8.2 on 2026-10-22.
+- **Phase 4, folder watching: committed as `2e85759f`** (new parity row, ✅), after a green `RUST_TEST_THREADS=2 cargo xtask ci`. The user approved `notify` 8.2 on 2026-10-22.
   - Engine: `crates/engine/src/folder_watch.rs`: trait `FolderWatcher` (`watch`, `unwatch`), `MakeWatcher`, `Sink` (filters each `Change` and marks the folder it happened in), `FolderWatch` in `Session.folder_watch` (`start`, `sync`, `take`, `wait`, `roots`, `syncing`), `native` (notify, `follow_symlinks(false)`, compiled out on wasm). `QUIET` 2 s, `MAX_WAIT` 10 s, `MAX_DIRTY` 10,000 (past that: rescan all). `ScanJob::of_changed`, `Session::sync_folder_watch` (skips the library). Command `library.folderWatch`.
   - What counts as a change: Create / Remove / Rename / Modify(Name|Other) of anything; Modify(Data|Metadata|Any) and Close(Write) only for supported image files. Hidden entries (below the watched root), the library, and folders no longer watched are dropped in the sink, before the UI is woken.
   - Watches are set up off the UI thread (one recursive inotify walk can be long on a big tree), with an activity row "Watching folders for changes" (`Cancel::No`).
@@ -31,6 +31,14 @@
   - Tests: `engine/src/tests_folder_watch.rs` (5, including one on the real `notify` watcher), `ui-egui/src/tests_folder_scan.rs` `a_watched_folder_brings_new_photos_in_without_waiting_for_the_rescan`.
   - `plan/STATUS.md` doesn't exist in this checkout, so the numbers are kept here and in the parity row.
   - Measured with `cargo test -p lightcraft-engine --lib bench_folder_watch -- --ignored --nocapture` (Linux, this machine, warm OS file cache; 10,000 files in 1,011 folders, all already in the library): startup scan cold (`full`) 34 ms wall / 0.04 s CPU, mtime-warm 5 ms / 0 s; watch setup 36 ms / 0.03 s; 60 s idle with watches on: 0.00 s CPU; 100 PNGs copied (141 ms) imported 13.2 s later (1 changed-folder scan, 1 rescan), 0.17 s CPU. The 13 s is the 10 s settle rule (a fresh file needs its size seen twice, or to be 10 s old), not the watch.
+- **Phase 5, Folder Manager: committed as `LRC-LIB-FOLDERS-MANAGER`** (new parity rows LRC-LIB-FOLDERS-MANAGER and MENU-FILE-FOLDERMANAGER, ✅), after a green `RUST_TEST_THREADS=2 cargo xtask ci`.
+  - Engine: `crates/engine/src/folder_list.rs`: `list_folders(dir, hidden, cap) -> Listing {folders, more, error}` (directories only, not links; dot folders and the Windows hidden attribute count as hidden; `MAX_LISTED` 500, `MAX_LISTED_ALL` 20,000) and `places(home)` (Home, Computer `/` or drive letters, then the children of `devices::mount_parents` and `$XDG_RUNTIME_DIR/gvfs`, named with `folders::mount_name`). `devices::mount_parents` and `folders::mount_name` made public to the crate / workspace. `MAX_MIN_LONG_EDGE` moved to `import.rs`.
+  - UI: `crates/ui-egui/src/folder_manager.rs` (`FolderManager` in `LightcraftApp.folder_manager`, with an injectable `lister` and `places`; `body`), `Dialog::FolderManager` (one Close; its own window id; anchored at the top like Settings, so rows don't move as folders open). `dialog.folderManager` in File after Import from Device (disabled on wasm). Settings ▸ Import ▸ Folder Scans ▸ Folder Manager…. Icons `ScanNever`, `ScanOnce`, `ScanAlways` in `icons.rs`. `folder_scan::set_mode` split out of `choose`.
+  - The Never question is asked inside the manager (Keep Them / Remove from Library), not with `Dialog::NeverScan`: there is one dialog at a time, and the manager should stay open.
+  - Listings run on worker threads counted by `fs_running_counter`, so the headless driver waits for them.
+  - Widget ids: `folderManager:toggle|row|mode|more|polling:<path>`, `folderManager:effective:<path>:<mode|none>:<own|inherited|default>`, `folderManager:choice:<inherit|never|once|always>`, `check:folderManagerHidden`, `button:folderManager{Refresh,Keep,Remove,Rescan}`, `button:settingsFolderManager`.
+  - Tests: `ui-egui/src/tests_folder_manager.rs` (6: lazy listing with a counting lister over 1,000+ folders and the 500 cap, default Never and setting it, hidden toggle, the Never question, the polling marker, opening from File and Settings); `engine/src/folder_list.rs` (2).
+  - Checked by eye with headless snapshots (`HOME=<scratch tree> lightcraft-cli snapshot --demo --script …`): icons, dimmed inherited modes, the tooltip, the settings row. Not tried in the windowed app.
 - **A slip earlier:** Phase 2 was started while Phase 1's first CI run was going, which mixed it into that run. Phase 2 was then taken out, Phase 1 was checked on its own, and Phase 2 was put back after the commit.
 
 ### Decisions so far
@@ -56,13 +64,19 @@
   - Headless checks through `lightcraft-cli snapshot --demo …` or `ui.screenshot {"headless": true}`.
 
 ### Next step
-1. Phase 5, the Folder Manager. Its polling marker reads `Session.folder_watch.roots()` (`RootWatch.error`), or `library.folderWatch`.
+1. The five phases are done. What's left is checking in the windowed app (all phases), the open points below, and merging `folder-workflow` into `main` when the user wants.
 2. Never edit the working tree while a CI run is going. That is what mixed Phase 2 into Phase 1's first run.
+3. Snapshot scripts use scratch folders only: setting a real folder (e.g. `~/Pictures`) to Always in a demo snapshot starts a real scan of it.
 
 ### Unfinished or uncertain
 - Phase 1 (Copy Full Path) hasn't been checked in the running app; the clipboard can't be seen in a headless snapshot. Phase 2 was checked by a headless snapshot only, not in the windowed app.
 - On Windows, `native_path` turns a folder row's forward slashes into backslashes. That has only been tested through a `cfg!(windows)` branch in the test, never on Windows.
 - The whole workspace test suite can run out of memory on machines with little free RAM; `RUST_TEST_THREADS=2` keeps it in bounds. `tests_masking::edit_in_photocraft_opens_a_psd_copy` alone peaks at about 3.5 GB.
+- Phase 5 open points:
+  - The tree has no search and no keyboard navigation; every listed row is laid out each frame (fine at 500 per folder, slower with "N more…" on a 20,000-folder folder).
+  - The scan settings fields save on every change (a drag saves `prefs.json` each step) and ask for a rescan each time.
+  - The mounted-disk list is read when the dialog first opens and on Refresh; a disk plugged in meanwhile needs Refresh.
+  - Windows drive letters and the hidden attribute are untested (no Windows here).
 - Phase 4 open points:
   - Not tried in the windowed app; the real watcher is covered only by the engine test on Linux (inotify). macOS (FSEvents) and Windows are untested.
   - The plan asked for the watch-limit notice as "toast and Activity". The activity stack only shows running tasks, so it's a toast (8 s, once per folder) plus `library.folderWatch`; a lasting notice is left for the Folder Manager.
@@ -174,7 +188,7 @@ Each phase is one or more commits with one task id each. `cargo xtask ci` is gre
 
   Results go to `plan/STATUS.md` → Metrics and this doc.
 
-### Phase 5: Folder Manager
+### Phase 5: Folder Manager (done)
 
 - A dialog of its own, since a whole-computer tree doesn't fit a Settings row. It opens from Settings ▸ Import ("Folder Manager…") and File ▸ Folder Manager… (`dialog.folderManager`). Desktop only.
 - **Tree roots:**
@@ -221,3 +235,4 @@ Earlier recommendation: **`notify`**. It is the standard choice and gives native
 | 2026-10-22 | The file is committed instead of kept local |
 | 2026-10-22 | Machine-specific memory notes trimmed, the memory reaper note dropped |
 | 2026-10-22 | Phase 4 done (`notify` approved): watcher, changed-folder scans, the watch-limit notice, measurements |
+| 2026-10-22 | Phase 5 done: the Folder Manager; the Never question asked inside it |

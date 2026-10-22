@@ -41,6 +41,7 @@ mod faces_worker;
 pub mod files;
 #[cfg(not(target_arch = "wasm32"))]
 mod focus_scan;
+pub mod folder_list;
 pub mod folder_scan;
 pub mod folder_watch;
 pub mod fonts;

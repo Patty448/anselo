@@ -301,5 +301,9 @@
   "Folder scan: added {} photo{}": "Prohledání složek: přidáno fotek: {}{:.0}",
   "Inherit (from {from}: {mode})": "Zdědit (z {from}: {mode})",
   "Can't watch “{folder}” for changes (system watch limit reached); it is checked every {minutes} min instead.": "Složku „{folder}“ nelze sledovat kvůli změnám (dosažen systémový limit sledování); místo toho se kontroluje každých {minutes} min.",
-  "Can't watch “{folder}” for changes; it is checked every {minutes} min instead.": "Složku „{folder}“ nelze sledovat kvůli změnám; místo toho se kontroluje každých {minutes} min."
+  "Can't watch “{folder}” for changes; it is checked every {minutes} min instead.": "Složku „{folder}“ nelze sledovat kvůli změnám; místo toho se kontroluje každých {minutes} min.",
+  "Inherited from {from}": "Zděděno z {from}",
+  "Not watched for changes ({why}); checked every {minutes} min instead.": "Změny se nesledují ({why}); místo toho se kontroluje každých {minutes} min.",
+  "{n} more…": "{n} dalších…",
+  "Can't list this folder: {e}": "Složku nelze vypsat: {e}"
 }

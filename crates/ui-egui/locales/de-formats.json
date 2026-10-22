@@ -301,5 +301,9 @@
   "Folder scan: added {} photo{}": "Ordnersuche: {} Foto{} hinzugefügt",
   "Inherit (from {from}: {mode})": "Übernehmen (von {from}: {mode})",
   "Can't watch “{folder}” for changes (system watch limit reached); it is checked every {minutes} min instead.": "„{folder}“ kann nicht auf Änderungen überwacht werden (Überwachungsgrenze des Systems erreicht); der Ordner wird stattdessen alle {minutes} Min. geprüft.",
-  "Can't watch “{folder}” for changes; it is checked every {minutes} min instead.": "„{folder}“ kann nicht auf Änderungen überwacht werden; der Ordner wird stattdessen alle {minutes} Min. geprüft."
+  "Can't watch “{folder}” for changes; it is checked every {minutes} min instead.": "„{folder}“ kann nicht auf Änderungen überwacht werden; der Ordner wird stattdessen alle {minutes} Min. geprüft.",
+  "Inherited from {from}": "Übernommen von {from}",
+  "Not watched for changes ({why}); checked every {minutes} min instead.": "Nicht auf Änderungen überwacht ({why}); stattdessen alle {minutes} Min. geprüft.",
+  "{n} more…": "{n} weitere…",
+  "Can't list this folder: {e}": "Ordner kann nicht gelesen werden: {e}"
 }

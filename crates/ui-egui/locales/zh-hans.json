@@ -2196,5 +2196,22 @@
   "Once: add the photos in this folder now; later ones are not looked for": "一次：立即添加此文件夹中的照片；之后的照片不再查找",
   "Always: add new photos in this folder whenever the folders are scanned": "始终：每次扫描文件夹时添加此文件夹中的新照片",
   "Inherit: as the folder above says": "继承：与上级文件夹相同",
-  "Watching folders for changes": "正在监视文件夹的更改"
+  "Watching folders for changes": "正在监视文件夹的更改",
+  "Inherit": "继承",
+  "Refresh": "刷新",
+  "Loading…": "正在加载…",
+  "Computer": "计算机",
+  "Show hidden folders": "显示隐藏的文件夹",
+  "Not scanned": "不扫描",
+  "Polling": "定期检查",
+  "Default: system and app folders are never scanned": "默认：系统和应用文件夹从不扫描",
+  "Skip images smaller than": "跳过小于此尺寸的图像",
+  "Rescan every": "重新扫描间隔",
+  "Rescan Now": "立即扫描",
+  "Looks for new photos in the folders set to Always.": "在设为“始终”的文件夹中查找新照片。",
+  "Choose where the library looks for new photos by itself. A folder without a choice of its own follows the folder it is in.": "选择资料库自行查找新照片的位置。没有自己设置的文件夹沿用其所在文件夹的设置。",
+  "Folder Manager": "文件夹管理器",
+  "Folder Manager…": "文件夹管理器…",
+  "Folder Scans": "文件夹扫描",
+  "Folders set to Always are looked through for new photos, which are added where they are.": "在设为“始终”的文件夹中查找新照片，并在原位置添加。"
 }

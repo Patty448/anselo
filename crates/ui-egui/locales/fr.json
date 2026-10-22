@@ -2355,5 +2355,22 @@
   "Once: add the photos in this folder now; later ones are not looked for": "Une fois : ajouter maintenant les photos de ce dossier ; les suivantes ne sont pas recherchées",
   "Always: add new photos in this folder whenever the folders are scanned": "Toujours : ajouter les nouvelles photos de ce dossier à chaque analyse des dossiers",
   "Inherit: as the folder above says": "Hériter : comme le dossier parent",
-  "Watching folders for changes": "Surveillance des dossiers"
+  "Watching folders for changes": "Surveillance des dossiers",
+  "Inherit": "Hériter",
+  "Refresh": "Actualiser",
+  "Loading…": "Chargement…",
+  "Computer": "Ordinateur",
+  "Show hidden folders": "Afficher les dossiers masqués",
+  "Not scanned": "Non analysé",
+  "Polling": "Vérifié périodiquement",
+  "Default: system and app folders are never scanned": "Par défaut : les dossiers du système et des applications ne sont jamais analysés",
+  "Skip images smaller than": "Ignorer les images de moins de",
+  "Rescan every": "Réanalyser toutes les",
+  "Rescan Now": "Analyser maintenant",
+  "Looks for new photos in the folders set to Always.": "Cherche de nouvelles photos dans les dossiers réglés sur Toujours.",
+  "Choose where the library looks for new photos by itself. A folder without a choice of its own follows the folder it is in.": "Choisissez où la bibliothèque cherche d’elle-même de nouvelles photos. Un dossier sans choix propre suit le dossier qui le contient.",
+  "Folder Manager": "Gestionnaire de dossiers",
+  "Folder Manager…": "Gestionnaire de dossiers…",
+  "Folder Scans": "Analyse des dossiers",
+  "Folders set to Always are looked through for new photos, which are added where they are.": "Les dossiers réglés sur Toujours sont parcourus à la recherche de nouvelles photos, ajoutées là où elles se trouvent."
 }

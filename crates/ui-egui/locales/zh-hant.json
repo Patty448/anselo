@@ -2158,5 +2158,22 @@
   "Once: add the photos in this folder now; later ones are not looked for": "一次：立即加入此資料夾中的照片；之後的照片不再尋找",
   "Always: add new photos in this folder whenever the folders are scanned": "一律：每次掃描資料夾時加入此資料夾中的新照片",
   "Inherit: as the folder above says": "繼承：與上層資料夾相同",
-  "Watching folders for changes": "正在監視資料夾的變更"
+  "Watching folders for changes": "正在監視資料夾的變更",
+  "Inherit": "繼承",
+  "Refresh": "重新整理",
+  "Loading…": "正在載入…",
+  "Computer": "電腦",
+  "Show hidden folders": "顯示隱藏的資料夾",
+  "Not scanned": "不掃描",
+  "Polling": "定期檢查",
+  "Default: system and app folders are never scanned": "預設：系統和應用程式資料夾一律不掃描",
+  "Skip images smaller than": "略過小於此尺寸的影像",
+  "Rescan every": "重新掃描間隔",
+  "Rescan Now": "立即掃描",
+  "Looks for new photos in the folders set to Always.": "在設為「一律」的資料夾中尋找新照片。",
+  "Choose where the library looks for new photos by itself. A folder without a choice of its own follows the folder it is in.": "選擇資料庫自行尋找新照片的位置。沒有自己設定的資料夾沿用其所在資料夾的設定。",
+  "Folder Manager": "資料夾管理員",
+  "Folder Manager…": "資料夾管理員…",
+  "Folder Scans": "資料夾掃描",
+  "Folders set to Always are looked through for new photos, which are added where they are.": "在設為「一律」的資料夾中尋找新照片，並在原位置加入。"
 }

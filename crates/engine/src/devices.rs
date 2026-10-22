@@ -28,7 +28,7 @@ pub const MAX_AGE: Duration = Duration::from_secs(2);
 
 /// Folders whose children are mounted volumes on this platform. `LIGHTCRAFT_DEVICE_ROOTS`
 /// (paths joined like `PATH`) replaces them (tests, unusual mounts).
-fn mount_parents() -> Vec<std::path::PathBuf> {
+pub(crate) fn mount_parents() -> Vec<std::path::PathBuf> {
     if let Some(v) = std::env::var_os("LIGHTCRAFT_DEVICE_ROOTS") {
         return std::env::split_paths(&v).collect();
     }

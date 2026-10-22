@@ -301,5 +301,9 @@
   "Folder scan: added {} photo{}": "Skanowanie folderów: dodane zdjęcia: {}{:.0}",
   "Inherit (from {from}: {mode})": "Dziedzicz (z {from}: {mode})",
   "Can't watch “{folder}” for changes (system watch limit reached); it is checked every {minutes} min instead.": "Nie można obserwować zmian w „{folder}” (osiągnięto systemowy limit obserwacji); zamiast tego folder jest sprawdzany co {minutes} min.",
-  "Can't watch “{folder}” for changes; it is checked every {minutes} min instead.": "Nie można obserwować zmian w „{folder}”; zamiast tego folder jest sprawdzany co {minutes} min."
+  "Can't watch “{folder}” for changes; it is checked every {minutes} min instead.": "Nie można obserwować zmian w „{folder}”; zamiast tego folder jest sprawdzany co {minutes} min.",
+  "Inherited from {from}": "Odziedziczone z {from}",
+  "Not watched for changes ({why}); checked every {minutes} min instead.": "Zmiany nie są obserwowane ({why}); zamiast tego sprawdzany co {minutes} min.",
+  "{n} more…": "Jeszcze {n}…",
+  "Can't list this folder: {e}": "Nie można wyświetlić zawartości folderu: {e}"
 }

@@ -301,5 +301,9 @@
   "Folder scan: added {} photo{}": "フォルダーのスキャン：{}枚の写真を追加しました{:.0}",
   "Inherit (from {from}: {mode})": "継承（{from}：{mode}）",
   "Can't watch “{folder}” for changes (system watch limit reached); it is checked every {minutes} min instead.": "「{folder}」の変更を監視できません（システムの監視数の上限に達しました）。代わりに {minutes} 分ごとに確認します。",
-  "Can't watch “{folder}” for changes; it is checked every {minutes} min instead.": "「{folder}」の変更を監視できません。代わりに {minutes} 分ごとに確認します。"
+  "Can't watch “{folder}” for changes; it is checked every {minutes} min instead.": "「{folder}」の変更を監視できません。代わりに {minutes} 分ごとに確認します。",
+  "Inherited from {from}": "{from} から継承",
+  "Not watched for changes ({why}); checked every {minutes} min instead.": "変更を監視していません（{why}）。代わりに {minutes} 分ごとに確認します。",
+  "{n} more…": "ほか {n} 件…",
+  "Can't list this folder: {e}": "このフォルダーを一覧できません：{e}"
 }

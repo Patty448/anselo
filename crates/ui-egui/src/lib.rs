@@ -17,6 +17,7 @@ pub mod date_picker;
 pub mod docking;
 pub mod export_task;
 mod focus_scan;
+pub mod folder_manager;
 pub mod folder_scan;
 pub mod headless;
 pub mod i18n;
@@ -96,6 +97,8 @@ mod tests_filmstrip;
 mod tests_focus_point;
 #[cfg(test)]
 mod tests_folder_drop;
+#[cfg(test)]
+mod tests_folder_manager;
 #[cfg(test)]
 mod tests_folder_scan;
 #[cfg(test)]
@@ -454,6 +457,8 @@ pub struct LightcraftApp {
     pub lightroom: Option<lightroom_import::LightroomTask>,
     /// When the folders set to Always are scanned, and the scan running.
     pub folder_scans: folder_scan::FolderScans,
+    /// The Folder Manager's tree.
+    pub folder_manager: folder_manager::FolderManager,
     /// Last terminal Lightroom result, exposed by the command's status/wait response.
     pub lightroom_last: Option<Value>,
     /// A completed import result waiting for another modal dialog to close.
@@ -555,6 +560,7 @@ impl LightcraftApp {
             sync_run: None,
             lightroom: None,
             folder_scans: Default::default(),
+            folder_manager: Default::default(),
             lightroom_last: None,
             lightroom_result: None,
             shown_library: None,

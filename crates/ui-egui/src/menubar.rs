@@ -68,6 +68,7 @@ const LAYOUT: &[(&str, &[&str])] = &[
             "file.addPhotos",
             "file.addFolder",
             "@Import from Device",
+            "dialog.folderManager",
             "---",
             "app.newLibrary",
             "app.openLibrary",

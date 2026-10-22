@@ -301,5 +301,9 @@
   "Folder scan: added {} photo{}": "Сканирование папок: добавлено фото: {}{:.0}",
   "Inherit (from {from}: {mode})": "Наследовать (от {from}: {mode})",
   "Can't watch “{folder}” for changes (system watch limit reached); it is checked every {minutes} min instead.": "Не удаётся отслеживать изменения в «{folder}» (достигнут системный лимит отслеживания); папка проверяется каждые {minutes} мин.",
-  "Can't watch “{folder}” for changes; it is checked every {minutes} min instead.": "Не удаётся отслеживать изменения в «{folder}»; папка проверяется каждые {minutes} мин."
+  "Can't watch “{folder}” for changes; it is checked every {minutes} min instead.": "Не удаётся отслеживать изменения в «{folder}»; папка проверяется каждые {minutes} мин.",
+  "Inherited from {from}": "Унаследовано от {from}",
+  "Not watched for changes ({why}); checked every {minutes} min instead.": "Изменения не отслеживаются ({why}); папка проверяется каждые {minutes} мин.",
+  "{n} more…": "Ещё {n}…",
+  "Can't list this folder: {e}": "Не удаётся получить список папки: {e}"
 }

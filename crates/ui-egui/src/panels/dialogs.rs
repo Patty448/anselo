@@ -178,6 +178,7 @@ fn window_id(dialog: &Dialog) -> egui::Id {
         Dialog::Import { .. } => "lightcraft-import-dialog",
         Dialog::Print => "lightcraft-print-dialog",
         Dialog::Settings { .. } => "lightcraft-settings-dialog",
+        Dialog::FolderManager => "lightcraft-folder-manager-dialog",
         _ => "lightcraft-dialog",
     })
 }
@@ -268,6 +269,7 @@ pub fn show(app: &mut LightcraftApp, ctx: &egui::Context) {
         Dialog::RemoveFolder { disk: true, .. } => "Remove Disk from Library",
         Dialog::RemoveFolder { .. } => "Remove Folder from Library",
         Dialog::NeverScan { .. } => "Never Scan Folder",
+        Dialog::FolderManager => "Folder Manager",
         Dialog::SynchronizeFolder { .. } => "Synchronize Folder",
         // (nothing to download from in this build: the dialog explains the manual install)
         Dialog::SamModel { .. } if sam_by_hand(&app.session.segmenter) => "Install the SAM 3 Model",
@@ -290,8 +292,9 @@ pub fn show(app: &mut LightcraftApp, ctx: &egui::Context) {
     let chrome_id = window_id.with("chrome");
     let chrome = ctx.data(|d| d.get_temp::<f32>(chrome_id)).unwrap_or(DIALOG_CHROME_GUESS);
     // Settings keeps its top edge, and the widest it has been, while tabs of different sizes are shown, so its tab
-    // row stays where it is (centred like the others, the row jumped with each tab's height)
-    let settings = matches!(dlg, Dialog::Settings { .. });
+    // row stays where it is (centred like the others, the row jumped with each tab's height); so does the Folder
+    // Manager, which grows as folders open (its rows would move under the pointer)
+    let settings = matches!(dlg, Dialog::Settings { .. } | Dialog::FolderManager);
     let top = (screen.height() * 0.08).clamp(DIALOG_SCREEN_MARGIN, 96.0);
     let body_max =
         if settings { screen.height() - top - DIALOG_SCREEN_MARGIN - chrome } else { screen.height() - 2.0 * DIALOG_SCREEN_MARGIN - chrome }
@@ -316,6 +319,7 @@ pub fn show(app: &mut LightcraftApp, ctx: &egui::Context) {
             Dialog::FaceModel { .. } => 460.0,
             Dialog::LightroomCatalog { .. } => 440.0,
             Dialog::ManageEffects { .. } => 560.0,
+            Dialog::FolderManager => 660.0,
             _ => 380.0,
         })
         .show(ctx, |ui| {
@@ -1329,6 +1333,7 @@ pub fn show(app: &mut LightcraftApp, ctx: &egui::Context) {
                     }
                 }
                 Dialog::Shortcuts => crate::panels::keymap::body(app, ui, &t),
+                Dialog::FolderManager => crate::folder_manager::body(app, ui, &t),
                 Dialog::Print => crate::print_view::body(app, ui, &t),
             });
             ui.add_space(4.0);
@@ -1953,7 +1958,9 @@ pub fn confirm_dialog(app: &mut LightcraftApp, dlg: &Dialog) -> Result<serde_jso
         // (the question named the photos: a folder holding whole disks goes as asked)
         Dialog::NeverScan { path, .. } => app.run("library.removeFolder", json!({"path": path, "disk": true})),
         d @ Dialog::SynchronizeFolder { .. } => crate::sync::confirm(app, d),
-        Dialog::About | Dialog::Shortcuts | Dialog::Settings { .. } | Dialog::ManageEffects { .. } => Ok(serde_json::Value::Null),
+        Dialog::About | Dialog::Shortcuts | Dialog::Settings { .. } | Dialog::ManageEffects { .. } | Dialog::FolderManager => {
+            Ok(serde_json::Value::Null)
+        }
     }
 }
 
@@ -2335,5 +2342,6 @@ fn only_shows(dlg: &Dialog) -> bool {
             | Dialog::AllMetadata { .. }
             | Dialog::WhatsNew
             | Dialog::ManageEffects { .. }
+            | Dialog::FolderManager
     )
 }

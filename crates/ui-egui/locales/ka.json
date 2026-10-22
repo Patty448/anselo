@@ -2735,5 +2735,22 @@
   "Once: add the photos in this folder now; later ones are not looked for": "ერთხელ: ამ საქაღალდის ფოტოები ახლავე დაემატება; შემდეგი არ მოიძებნება",
   "Always: add new photos in this folder whenever the folders are scanned": "ყოველთვის: ამ საქაღალდის ახალი ფოტოები ემატება საქაღალდეების ყოველი სკანირებისას",
   "Inherit: as the folder above says": "მემკვიდრეობით: როგორც ზედა საქაღალდეშია",
-  "Watching folders for changes": "საქაღალდეების ცვლილებებზე თვალყურის დევნება"
+  "Watching folders for changes": "საქაღალდეების ცვლილებებზე თვალყურის დევნება",
+  "Inherit": "მემკვიდრეობით",
+  "Refresh": "განახლება",
+  "Loading…": "იტვირთება…",
+  "Computer": "კომპიუტერი",
+  "Show hidden folders": "დამალული საქაღალდეების ჩვენება",
+  "Not scanned": "არ სკანირდება",
+  "Polling": "პერიოდული შემოწმება",
+  "Default: system and app folders are never scanned": "ნაგულისხმევი: სისტემისა და აპების საქაღალდეები არასოდეს სკანირდება",
+  "Skip images smaller than": "გამოტოვე სურათები, რომლებიც ნაკლებია",
+  "Rescan every": "ხელახლა სკანირება ყოველ",
+  "Rescan Now": "სკანირება ახლა",
+  "Looks for new photos in the folders set to Always.": "ეძებს ახალ ფოტოებს „ყოველთვის“-ზე დაყენებულ საქაღალდეებში.",
+  "Choose where the library looks for new photos by itself. A folder without a choice of its own follows the folder it is in.": "აირჩიეთ, სად ეძებს ბიბლიოთეკა ახალ ფოტოებს თავად. საქაღალდე საკუთარი არჩევანის გარეშე მიჰყვება იმ საქაღალდეს, რომელშიც არის.",
+  "Folder Manager": "საქაღალდეების მმართველი",
+  "Folder Manager…": "საქაღალდეების მმართველი…",
+  "Folder Scans": "საქაღალდეების სკანირება",
+  "Folders set to Always are looked through for new photos, which are added where they are.": "„ყოველთვის“-ზე დაყენებულ საქაღალდეებში იძებნება ახალი ფოტოები და ემატება იქ, სადაც არის."
 }

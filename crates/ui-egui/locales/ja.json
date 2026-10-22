@@ -2357,5 +2357,22 @@
   "Once: add the photos in this folder now; later ones are not looked for": "1回のみ：このフォルダーの写真を今追加します。後から追加された写真は探しません",
   "Always: add new photos in this folder whenever the folders are scanned": "常に：フォルダーをスキャンするたびに、このフォルダーの新しい写真を追加します",
   "Inherit: as the folder above says": "継承：上のフォルダーの設定に従います",
-  "Watching folders for changes": "フォルダーの変更を監視中"
+  "Watching folders for changes": "フォルダーの変更を監視中",
+  "Inherit": "継承",
+  "Refresh": "更新",
+  "Loading…": "読み込み中…",
+  "Computer": "コンピューター",
+  "Show hidden folders": "隠しフォルダーを表示",
+  "Not scanned": "スキャンしない",
+  "Polling": "定期確認",
+  "Default: system and app folders are never scanned": "既定：システムとアプリのフォルダーはスキャンしません",
+  "Skip images smaller than": "次より小さい画像をスキップ",
+  "Rescan every": "再スキャンの間隔",
+  "Rescan Now": "今すぐスキャン",
+  "Looks for new photos in the folders set to Always.": "「常に」に設定したフォルダーで新しい写真を探します。",
+  "Choose where the library looks for new photos by itself. A folder without a choice of its own follows the folder it is in.": "ライブラリが自動で新しい写真を探す場所を選びます。設定のないフォルダーは、それを含むフォルダーに従います。",
+  "Folder Manager": "フォルダーマネージャー",
+  "Folder Manager…": "フォルダーマネージャー…",
+  "Folder Scans": "フォルダースキャン",
+  "Folders set to Always are looked through for new photos, which are added where they are.": "「常に」に設定したフォルダーで新しい写真を探し、その場所のままライブラリに追加します。"
 }

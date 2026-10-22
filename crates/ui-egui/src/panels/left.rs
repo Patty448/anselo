@@ -976,7 +976,7 @@ pub(crate) fn fs_cached_running(ctx: &egui::Context) -> usize {
     fs_running_counter(ctx).load(std::sync::atomic::Ordering::Acquire)
 }
 
-fn fs_running_counter(ctx: &egui::Context) -> std::sync::Arc<std::sync::atomic::AtomicUsize> {
+pub(crate) fn fs_running_counter(ctx: &egui::Context) -> std::sync::Arc<std::sync::atomic::AtomicUsize> {
     ctx.data_mut(|d| d.get_temp_mut_or_default::<std::sync::Arc<std::sync::atomic::AtomicUsize>>(egui::Id::new("fs-cached-running")).clone())
 }
 

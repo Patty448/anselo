@@ -301,5 +301,9 @@
   "Folder scan: added {} photo{}": "Varredura de pastas: {} foto{} adicionada(s)",
   "Inherit (from {from}: {mode})": "Herdar (de {from}: {mode})",
   "Can't watch “{folder}” for changes (system watch limit reached); it is checked every {minutes} min instead.": "Não é possível observar mudanças em “{folder}” (limite de observação do sistema atingido); ela é verificada a cada {minutes} min.",
-  "Can't watch “{folder}” for changes; it is checked every {minutes} min instead.": "Não é possível observar mudanças em “{folder}”; ela é verificada a cada {minutes} min."
+  "Can't watch “{folder}” for changes; it is checked every {minutes} min instead.": "Não é possível observar mudanças em “{folder}”; ela é verificada a cada {minutes} min.",
+  "Inherited from {from}": "Herdado de {from}",
+  "Not watched for changes ({why}); checked every {minutes} min instead.": "Mudanças não observadas ({why}); verificada a cada {minutes} min.",
+  "{n} more…": "Mais {n}…",
+  "Can't list this folder: {e}": "Não é possível listar esta pasta: {e}"
 }

@@ -6,11 +6,8 @@ use serde_json::{Value, json};
 
 use super::{CommandSpec, always, bad, bool_or, cmd, str_param};
 use crate::folder_scan::{ScanJob, finish, once_params};
-use crate::import::SCAN_RESCAN_MAX_MINUTES;
+use crate::import::{MAX_MIN_LONG_EDGE, SCAN_RESCAN_MAX_MINUTES};
 use crate::{Result, Session};
-
-/// The largest minimum long edge that can be set (pixels).
-pub const MAX_MIN_LONG_EDGE: u32 = 100_000;
 
 /// `{mode, from, default, inLibrary}` for folder `path`: its effective mode (`null`: not
 /// scanned), the folder that says so, whether that is a built-in default, and how many library

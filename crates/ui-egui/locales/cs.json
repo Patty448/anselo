@@ -2080,5 +2080,22 @@
   "Once: add the photos in this folder now; later ones are not looked for": "Jednou: přidat fotky z této složky hned; pozdější se nehledají",
   "Always: add new photos in this folder whenever the folders are scanned": "Vždy: přidávat nové fotky z této složky při každém prohledání složek",
   "Inherit: as the folder above says": "Zdědit: podle nadřazené složky",
-  "Watching folders for changes": "Sledování složek kvůli změnám"
+  "Watching folders for changes": "Sledování složek kvůli změnám",
+  "Inherit": "Zdědit",
+  "Refresh": "Obnovit",
+  "Loading…": "Načítání…",
+  "Computer": "Počítač",
+  "Show hidden folders": "Zobrazit skryté složky",
+  "Not scanned": "Neprohledává se",
+  "Polling": "Pravidelná kontrola",
+  "Default: system and app folders are never scanned": "Výchozí: systémové složky a složky aplikací se nikdy neprohledávají",
+  "Skip images smaller than": "Přeskočit obrázky menší než",
+  "Rescan every": "Znovu prohledat každých",
+  "Rescan Now": "Prohledat nyní",
+  "Looks for new photos in the folders set to Always.": "Hledá nové fotky ve složkách nastavených na Vždy.",
+  "Choose where the library looks for new photos by itself. A folder without a choice of its own follows the folder it is in.": "Vyberte, kde knihovna sama hledá nové fotky. Složka bez vlastní volby se řídí složkou, ve které je.",
+  "Folder Manager": "Správce složek",
+  "Folder Manager…": "Správce složek…",
+  "Folder Scans": "Prohledávání složek",
+  "Folders set to Always are looked through for new photos, which are added where they are.": "Ve složkách nastavených na Vždy se hledají nové fotky a přidávají se tam, kde jsou."
 }

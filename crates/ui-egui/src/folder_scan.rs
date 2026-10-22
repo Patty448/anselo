@@ -1,9 +1,13 @@
 //! Folder scans in the app (see [`lightcraft_engine::folder_scan`]): the folders set to Always are
 //! scanned on a worker thread at startup, as soon as the folders set to Always change, every
 //! `scanRescanMinutes`, and again shortly while a file in them is still being written; what a scan
-//! finds is added like an Auto Import. Also the Scan ▸ submenu of folder rows (Folders and Local),
+//! finds is added like an Auto Import. They are also watched for changes
+//! ([`lightcraft_engine::folder_watch`], with [`crate::Services::folder_watcher`]): a folder in
+//! which something changed is scanned on its own once things go quiet there, and a folder that
+//! can't be watched is said once and left to the rescans. Also the Scan ▸ submenu of folder rows (Folders and Local),
 //! which sets a folder's mode and asks, for Never, whether the photos already in the library go.
 
+use std::collections::HashSet;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
@@ -31,6 +35,10 @@ pub struct FolderScans {
     revision: Option<u64>,
     /// The running scan's row in the activity stack.
     guard: Option<lightcraft_engine::activity::TaskGuard>,
+    /// Folders (keys) where something changed, to scan once nothing else imports.
+    changed: Vec<String>,
+    /// The folders said to be left to the rescans (said once each).
+    told: HashSet<String>,
 }
 
 impl FolderScans {
@@ -58,28 +66,101 @@ pub fn tick(app: &mut LightcraftApp, ctx: &egui::Context) {
         if app.folder_scans.roots.as_ref() != Some(&roots) {
             // (also the first time: the scan at startup)
             app.folder_scans.due |= !roots.is_empty();
+            watch(app, ctx, &roots);
             app.folder_scans.roots = Some(roots);
         }
     }
     if app.folder_scans.roots.as_ref().is_none_or(Vec::is_empty) {
         app.folder_scans.due = false;
+        app.folder_scans.changed.clear();
         return;
     }
+    changes(app, ctx);
     if now >= app.folder_scans.next_at {
         app.folder_scans.due = true;
     }
-    if app.folder_scans.due && !busy(app) {
-        app.folder_scans.due = false;
-        let every = f64::from(app.session.import_defaults.scan_rescan_minutes()) * 60.0;
-        app.folder_scans.next_at = now + every;
-        start(app);
+    if !busy(app) {
+        if app.folder_scans.due {
+            app.folder_scans.due = false;
+            // (a full scan covers the folders that changed)
+            app.folder_scans.changed.clear();
+            let every = f64::from(app.session.import_defaults.scan_rescan_minutes()) * 60.0;
+            app.folder_scans.next_at = now + every;
+            start(app, None);
+        } else if !app.folder_scans.changed.is_empty() {
+            let changed = std::mem::take(&mut app.folder_scans.changed);
+            start(app, Some(changed));
+        }
     }
-    let wait = (app.folder_scans.next_at - now).clamp(1.0, 60.0);
+    let mut wait = (app.folder_scans.next_at - now).clamp(1.0, 60.0);
+    if let Some(w) = app.session.folder_watch.wait(web_time::Instant::now()) {
+        wait = wait.min(w.as_secs_f64().max(0.05));
+    }
     ctx.request_repaint_after(std::time::Duration::from_secs_f64(wait));
 }
 
-fn start(app: &mut LightcraftApp) {
-    let job = match lightcraft_engine::folder_scan::ScanJob::new(&mut app.session, None, false) {
+/// Watch the folders set to Always, `roots`, for changes (starting the watcher the first time
+/// there are some).
+fn watch(app: &mut LightcraftApp, ctx: &egui::Context, roots: &[String]) {
+    if !roots.is_empty()
+        && !app.session.folder_watch.started()
+        && let Some(make) = app.services.folder_watcher.clone()
+    {
+        let repaint = ctx.clone();
+        if let Err(e) = app.session.folder_watch.start(&make, Box::new(move || repaint.request_repaint())) {
+            log::warn!("folder watch: {e}; the folders set to Always are only rescanned");
+        }
+    }
+    app.session.sync_folder_watch(roots);
+    // a folder no longer set to Always is said again if it is set again and can't be watched
+    app.folder_scans.told.retain(|t| roots.contains(t));
+}
+
+/// What the watches saw: folders that changed (scanned once things are quiet there), and folders
+/// that can't be watched (said once).
+fn changes(app: &mut LightcraftApp, ctx: &egui::Context) {
+    let taken = app.session.folder_watch.take(web_time::Instant::now());
+    for (root, e) in taken.failed {
+        if !app.folder_scans.told.insert(root.clone()) {
+            continue;
+        }
+        let folder = lightcraft_catalog::folders::folder_label(&root);
+        let minutes = app.session.import_defaults.scan_rescan_minutes();
+        let text = if e.limit {
+            crate::i18n::tr_format!(
+                "Can't watch “{folder}” for changes (system watch limit reached); it is checked every {minutes} min instead.",
+                folder = folder,
+                minutes = minutes
+            )
+        } else {
+            crate::i18n::tr_format!(
+                "Can't watch “{folder}” for changes; it is checked every {minutes} min instead.",
+                folder = folder,
+                minutes = minutes
+            )
+        };
+        app.toast_for(ctx, text, 8.0);
+    }
+    match taken.due {
+        Some(lightcraft_engine::folder_watch::Due::All) => app.folder_scans.due = true,
+        Some(lightcraft_engine::folder_watch::Due::Folders(dirs)) => {
+            for d in dirs {
+                if !app.folder_scans.changed.contains(&d) {
+                    app.folder_scans.changed.push(d);
+                }
+            }
+        }
+        None => {}
+    }
+}
+
+/// Scan the folders set to Always (all of them, or the ones `changed`).
+fn start(app: &mut LightcraftApp, changed: Option<Vec<String>>) {
+    let job = match changed {
+        None => lightcraft_engine::folder_scan::ScanJob::new(&mut app.session, None, false),
+        Some(c) => Ok(lightcraft_engine::folder_scan::ScanJob::of_changed(&mut app.session, c)),
+    };
+    let job = match job {
         Ok(j) if !j.roots.is_empty() => j,
         Ok(_) => return,
         Err(e) => return log::warn!("folder scan: {e}"),

@@ -299,5 +299,7 @@
   " · {} small image{} skipped": " · {} imágenes pequeñas omitidas{:.0}",
   "Also remove the {count} photo{} from “{name}” that are already in the library?": "¿Quitar también de la biblioteca las fotos de «{name}» que ya están en ella ({count}){:.0}?",
   "Folder scan: added {} photo{}": "Búsqueda en carpetas: {} foto{} añadida(s)",
-  "Inherit (from {from}: {mode})": "Heredar (de {from}: {mode})"
+  "Inherit (from {from}: {mode})": "Heredar (de {from}: {mode})",
+  "Can't watch “{folder}” for changes (system watch limit reached); it is checked every {minutes} min instead.": "No se pueden vigilar los cambios en «{folder}» (se alcanzó el límite de vigilancia del sistema); se revisa cada {minutes} min.",
+  "Can't watch “{folder}” for changes; it is checked every {minutes} min instead.": "No se pueden vigilar los cambios en «{folder}»; se revisa cada {minutes} min."
 }

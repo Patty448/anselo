@@ -1,6 +1,6 @@
 //! Folder scans in the app: a folder row's Scan ▸ submenu (Never / Once / Always / Inherit), the
-//! question Never asks about the photos already in the library, and the background scan of the
-//! folders set to Always with its row in the activity stack.
+//! question Never asks about the photos already in the library, the background scan of the
+//! folders set to Always with its row in the activity stack, and the watch on those folders.
 
 use std::path::{Path, PathBuf};
 use std::time::Duration;
@@ -16,6 +16,10 @@ const SETTLE: Duration = Duration::from_secs(120);
 
 /// A headless app over file-backed photos that exist only in the catalog.
 fn app(paths: &[&str]) -> Headless {
+    app_with(paths, Services { png: None, ..Default::default() })
+}
+
+fn app_with(paths: &[&str], services: Services) -> Headless {
     use lightcraft_catalog::{Op, Photo, Source};
     let mut session = lightcraft_engine::Session::new().with_fs();
     for path in paths {
@@ -23,7 +27,7 @@ fn app(paths: &[&str]) -> Headless {
         let p = Photo::new(id, Source::File { path: (*path).into() }, "x.jpg", "JPEG", 60, 40, "2026-01-01T10:00:00");
         session.catalog.apply(Op::AddPhoto { photo: Box::new(p) }).unwrap();
     }
-    let mut h = Headless::new(LightcraftApp::new(session, Services { png: None, ..Default::default() }), [1400.0, 900.0], 1.0);
+    let mut h = Headless::new(LightcraftApp::new(session, services), [1400.0, 900.0], 1.0);
     let r = h.request("ui.set", json!({"view": "photoGrid", "leftPanel": true}), T);
     assert_eq!(r["ok"], true, "{r}");
     h.settle(SETTLE);
@@ -170,4 +174,61 @@ fn a_running_scan_has_a_cancellable_row() {
     assert_eq!((row.label.as_str(), row.cancellable), ("Scanning folders", true));
     assert!(h.step_until(T, |h| h.app.session.catalog.len() == 1));
     let _ = std::fs::remove_dir_all(&src);
+}
+
+/// A watcher that refuses the folders in `fail` (as at the system's watch limit).
+struct FakeWatcher {
+    fail: Vec<String>,
+}
+
+impl lightcraft_engine::folder_watch::FolderWatcher for FakeWatcher {
+    fn watch(&mut self, root: &Path) -> Result<(), lightcraft_engine::folder_watch::WatchError> {
+        if self.fail.iter().any(|f| Path::new(f) == root) {
+            return Err(lightcraft_engine::folder_watch::WatchError { limit: true, message: "no more watches".into() });
+        }
+        Ok(())
+    }
+
+    fn unwatch(&mut self, _root: &Path) {}
+}
+
+/// A photo copied into a folder set to Always comes in as soon as things are quiet there, without
+/// waiting for the next rescan; a folder set to Always that can't be watched is said once.
+#[test]
+fn a_watched_folder_brings_new_photos_in_without_waiting_for_the_rescan() {
+    use lightcraft_engine::folder_watch::{Change, MakeWatcher, Sink};
+    use std::sync::{Arc, Mutex};
+    let src = temp_dir("watch");
+    let full = temp_dir("watch-full");
+    write_png(&src.join("a.png"), 400, 300, 1);
+    let key = |p: &Path| lightcraft_catalog::query::folder_key(&p.to_string_lossy());
+    let slot: Arc<Mutex<Option<Sink>>> = Arc::new(Mutex::new(None));
+    let (sl, fail) = (slot.clone(), vec![key(&full)]);
+    let make: MakeWatcher = Arc::new(move |sink: Sink| {
+        *sl.lock().unwrap() = Some(sink);
+        Ok(Box::new(FakeWatcher { fail: fail.clone() }) as Box<dyn lightcraft_engine::folder_watch::FolderWatcher>)
+    });
+    let mut h = app_with(&[], Services { png: None, folder_watcher: Some(make), ..Default::default() });
+    let r = h.request("engine.execute", json!({"command": "folder.scanMode", "params": {"path": key(&src), "mode": "always"}}), T);
+    assert_eq!(r["ok"], true, "{r}");
+    assert!(h.step_until(T, |h| h.app.session.catalog.len() == 1 && h.app.import.is_none()), "the first scan added the photo");
+    assert!(h.step_until(T, |h| h.app.session.folder_watch.roots().iter().any(|(k, w)| *k == key(&src) && w.watched)), "the folder is watched");
+
+    // the next rescan is half an hour away: the change alone brings the photo in
+    write_png(&src.join("trip/b.png"), 400, 300, 2);
+    let sink = slot.lock().unwrap().clone().unwrap();
+    sink.push([Change::Path { path: src.join("trip"), written: false }, Change::Path { path: src.join("trip/b.png"), written: false }]);
+    assert!(h.step_until(T, |h| h.app.session.catalog.len() == 2 && h.app.import.is_none()), "{}", h.app.session.catalog.len());
+
+    // a folder that can't be watched is said, once
+    let r = h.request("engine.execute", json!({"command": "folder.scanMode", "params": {"path": key(&full), "mode": "always"}}), T);
+    assert_eq!(r["ok"], true, "{r}");
+    let said = |h: &Headless| h.app.ui.toast.as_ref().is_some_and(|(t, ..)| t.starts_with("Can't watch") && t.contains("system watch limit"));
+    assert!(h.step_until(T, said), "{:?}", h.app.ui.toast);
+    let r = h.request("engine.execute", json!({"command": "library.folderWatch", "params": {}}), T);
+    let polling: Vec<&str> =
+        r["result"]["folders"].as_array().unwrap().iter().filter(|f| f["polling"] == true).filter_map(|f| f["path"].as_str()).collect();
+    assert_eq!(polling, [key(&full).as_str()], "{r}");
+    let _ = std::fs::remove_dir_all(&src);
+    let _ = std::fs::remove_dir_all(&full);
 }

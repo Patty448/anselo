@@ -299,5 +299,7 @@
   " · {} small image{} skipped": " · {} petites images ignorées{:.0}",
   "Also remove the {count} photo{} from “{name}” that are already in the library?": "Retirer aussi de la bibliothèque les photos de « {name} » qui s’y trouvent déjà ({count}){:.0} ?",
   "Folder scan: added {} photo{}": "Analyse des dossiers : {} photo{} ajoutée(s)",
-  "Inherit (from {from}: {mode})": "Hériter (de {from} : {mode})"
+  "Inherit (from {from}: {mode})": "Hériter (de {from} : {mode})",
+  "Can't watch “{folder}” for changes (system watch limit reached); it is checked every {minutes} min instead.": "Impossible de surveiller les changements dans « {folder} » (limite de surveillance du système atteinte) ; il est vérifié toutes les {minutes} min à la place.",
+  "Can't watch “{folder}” for changes; it is checked every {minutes} min instead.": "Impossible de surveiller les changements dans « {folder} » ; il est vérifié toutes les {minutes} min à la place."
 }

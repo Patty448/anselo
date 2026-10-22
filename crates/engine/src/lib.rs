@@ -42,6 +42,7 @@ pub mod files;
 #[cfg(not(target_arch = "wasm32"))]
 mod focus_scan;
 pub mod folder_scan;
+pub mod folder_watch;
 pub mod fonts;
 pub mod guard;
 pub mod import;
@@ -338,6 +339,8 @@ pub struct Session {
     /// What folder scans saw of the folders they listed, read from the library when first needed
     /// (see [`folder_scan`]).
     scan_state: Option<folder_scan::ScanState>,
+    /// The change notifications on the folders set to Always (idle until the host starts them).
+    pub folder_watch: folder_watch::FolderWatch,
     /// Keyword sets (⌥1–⌥9 apply the current set's keywords), the one in use (`None` = Recent
     /// Keywords) and the recently added keywords, newest first.
     pub keyword_sets: Vec<cmd::keywords::KeywordSet>,
@@ -484,6 +487,7 @@ impl Session {
             target_album: None,
             auto_import_seen: Default::default(),
             scan_state: None,
+            folder_watch: Default::default(),
             keyword_sets: Vec::new(),
             keyword_set: None,
             recent_keywords: Vec::new(),
@@ -1273,6 +1277,8 @@ mod tests_filesystem_history;
 mod tests_focus_scan;
 #[cfg(test)]
 mod tests_folder_scan;
+#[cfg(test)]
+mod tests_folder_watch;
 #[cfg(test)]
 mod tests_folders;
 #[cfg(test)]

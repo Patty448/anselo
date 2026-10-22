@@ -2157,5 +2157,6 @@
   "Never: photos in this folder and the folders inside it are not added by scans": "永不：掃描不會加入此資料夾及其子資料夾中的照片",
   "Once: add the photos in this folder now; later ones are not looked for": "一次：立即加入此資料夾中的照片；之後的照片不再尋找",
   "Always: add new photos in this folder whenever the folders are scanned": "一律：每次掃描資料夾時加入此資料夾中的新照片",
-  "Inherit: as the folder above says": "繼承：與上層資料夾相同"
+  "Inherit: as the folder above says": "繼承：與上層資料夾相同",
+  "Watching folders for changes": "正在監視資料夾的變更"
 }

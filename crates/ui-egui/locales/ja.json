@@ -2356,5 +2356,6 @@
   "Never: photos in this folder and the folders inside it are not added by scans": "しない：このフォルダーとその中のフォルダーの写真はスキャンで追加されません",
   "Once: add the photos in this folder now; later ones are not looked for": "1回のみ：このフォルダーの写真を今追加します。後から追加された写真は探しません",
   "Always: add new photos in this folder whenever the folders are scanned": "常に：フォルダーをスキャンするたびに、このフォルダーの新しい写真を追加します",
-  "Inherit: as the folder above says": "継承：上のフォルダーの設定に従います"
+  "Inherit: as the folder above says": "継承：上のフォルダーの設定に従います",
+  "Watching folders for changes": "フォルダーの変更を監視中"
 }

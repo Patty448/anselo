@@ -2006,5 +2006,6 @@
   "Never: photos in this folder and the folders inside it are not added by scans": "Mai: le foto di questa cartella e delle sue sottocartelle non vengono aggiunte dalle scansioni",
   "Once: add the photos in this folder now; later ones are not looked for": "Una volta: aggiungi ora le foto di questa cartella; quelle successive non vengono cercate",
   "Always: add new photos in this folder whenever the folders are scanned": "Sempre: aggiungi le nuove foto di questa cartella a ogni scansione delle cartelle",
-  "Inherit: as the folder above says": "Eredita: come la cartella superiore"
+  "Inherit: as the folder above says": "Eredita: come la cartella superiore",
+  "Watching folders for changes": "Controllo delle modifiche nelle cartelle"
 }

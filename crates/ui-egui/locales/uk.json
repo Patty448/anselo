@@ -2354,5 +2354,6 @@
   "Never: photos in this folder and the folders inside it are not added by scans": "Ніколи: фото з цієї теки та вкладених тек не додаються під час сканування",
   "Once: add the photos in this folder now; later ones are not looked for": "Один раз: додати фото з цієї теки зараз; нові не шукаються",
   "Always: add new photos in this folder whenever the folders are scanned": "Завжди: додавати нові фото з цієї теки під час кожного сканування тек",
-  "Inherit: as the folder above says": "Успадкувати: як у теки вище"
+  "Inherit: as the folder above says": "Успадкувати: як у теки вище",
+  "Watching folders for changes": "Стеження за змінами в теках"
 }

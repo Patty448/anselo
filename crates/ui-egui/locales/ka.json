@@ -2734,5 +2734,6 @@
   "Never: photos in this folder and the folders inside it are not added by scans": "არასოდეს: ამ საქაღალდისა და მისი ქვესაქაღალდეების ფოტოები სკანირებით არ ემატება",
   "Once: add the photos in this folder now; later ones are not looked for": "ერთხელ: ამ საქაღალდის ფოტოები ახლავე დაემატება; შემდეგი არ მოიძებნება",
   "Always: add new photos in this folder whenever the folders are scanned": "ყოველთვის: ამ საქაღალდის ახალი ფოტოები ემატება საქაღალდეების ყოველი სკანირებისას",
-  "Inherit: as the folder above says": "მემკვიდრეობით: როგორც ზედა საქაღალდეშია"
+  "Inherit: as the folder above says": "მემკვიდრეობით: როგორც ზედა საქაღალდეშია",
+  "Watching folders for changes": "საქაღალდეების ცვლილებებზე თვალყურის დევნება"
 }

@@ -299,5 +299,7 @@
   " · {} small image{} skipped": "・已略過 {} 張小圖片{:.0}",
   "Also remove the {count} photo{} from “{name}” that are already in the library?": "同時從圖庫中移除「{name}」中已在圖庫裡的 {count} 張照片嗎？{:.0}",
   "Folder scan: added {} photo{}": "資料夾掃描：已加入 {} 張照片{:.0}",
-  "Inherit (from {from}: {mode})": "繼承（來自 {from}：{mode}）"
+  "Inherit (from {from}: {mode})": "繼承（來自 {from}：{mode}）",
+  "Can't watch “{folder}” for changes (system watch limit reached); it is checked every {minutes} min instead.": "無法監視「{folder}」的變更（已達系統監視上限）；改為每 {minutes} 分鐘檢查一次。",
+  "Can't watch “{folder}” for changes; it is checked every {minutes} min instead.": "無法監視「{folder}」的變更；改為每 {minutes} 分鐘檢查一次。"
 }

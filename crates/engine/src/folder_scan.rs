@@ -139,6 +139,13 @@ impl Session {
         self.scan_state = Some(state);
     }
 
+    /// Watch the folders `roots` (the folders set to Always) for changes, leaving out the library
+    /// ([`crate::folder_watch::FolderWatch::sync`]; nothing until the host has started watching).
+    pub fn sync_folder_watch(&mut self, roots: &[String]) {
+        let skip = self.library.as_ref().filter(|l| l.on_disk).map(|l| l.dir.to_string_lossy().to_string()).into_iter().collect();
+        self.folder_watch.sync(roots, skip, &self.activity);
+    }
+
     /// Forget what the last scans saw in folder `path` and the folders inside it: the next scan
     /// lists them all (a folder just set to Always may hold files the library let go of).
     pub fn forget_scan_state(&mut self, path: &str) {
@@ -224,6 +231,19 @@ impl ScanJob {
         };
         let lib_dir = s.library.as_ref().filter(|l| l.on_disk).map(|l| l.dir.clone());
         Ok(ScanJob { roots, rules, lib_dir, state: s.scan_state(), full })
+    }
+
+    /// A scan of just the folders `changed` (folders in the Always folders where something
+    /// changed, [`crate::folder_watch`]): those not set to Always are left out, and one inside
+    /// another is covered by it.
+    pub fn of_changed(s: &mut Session, changed: Vec<String>) -> ScanJob {
+        let rules = s.scan_rules();
+        let mut keys: Vec<String> = changed.iter().map(|c| folder_key(c)).filter(|k| rules.mode(k).mode == Some(ScanMode::Always)).collect();
+        keys.sort();
+        keys.dedup();
+        let roots = keys.iter().filter(|k| !keys.iter().any(|o| o != *k && key_within(k, o))).cloned().collect();
+        let lib_dir = s.library.as_ref().filter(|l| l.on_disk).map(|l| l.dir.clone());
+        ScanJob { roots, rules, lib_dir, state: s.scan_state(), full: false }
     }
 
     /// Walk the roots (no catalog access; stops before the next folder once `cancel` is set).

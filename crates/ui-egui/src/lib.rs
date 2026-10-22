@@ -306,6 +306,9 @@ pub struct Services {
     pub restore_library: Option<HostAction>,
     /// The system appearance for Appearance Mode ▸ Auto, ahead of egui's own report.
     pub system_theme: Option<SystemThemeFn>,
+    /// Change notifications for the folders set to Always (desktop:
+    /// `lightcraft_engine::folder_watch::native`; without it they wait for the regular rescans).
+    pub folder_watcher: Option<lightcraft_engine::folder_watch::MakeWatcher>,
 }
 
 #[derive(Clone, Copy, Debug, Default)]

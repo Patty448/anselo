@@ -2349,5 +2349,6 @@
   "Never: photos in this folder and the folders inside it are not added by scans": "Никогда: фото из этой папки и вложенных папок не добавляются при сканировании",
   "Once: add the photos in this folder now; later ones are not looked for": "Однократно: добавить фото из этой папки сейчас; новые не ищутся",
   "Always: add new photos in this folder whenever the folders are scanned": "Всегда: добавлять новые фото из этой папки при каждом сканировании папок",
-  "Inherit: as the folder above says": "Наследовать: как у папки выше"
+  "Inherit: as the folder above says": "Наследовать: как у папки выше",
+  "Watching folders for changes": "Отслеживание изменений в папках"
 }

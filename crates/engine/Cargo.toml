@@ -46,6 +46,9 @@ lightcraft-segment = { workspace = true, optional = true }
 # model downloads run natively only (the web build fetches no models)
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 lightcraft-fetch = { workspace = true }
+# Change notifications for the folders set to Always (inotify, FSEvents, ReadDirectoryChangesW;
+# CC0-1.0, no C build step).
+notify = "8.2"
 
 [features]
 # AI masks with SAM 3 (Object / Describe). Off for the web and CLI builds.

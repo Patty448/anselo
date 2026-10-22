@@ -1,6 +1,6 @@
 # Folder workflow plan (Picasa-style)
 
-> **Last updated:** 2026-10-22 · **Status:** Phases 1 (`b5d34059`), 2 (`4a3c7780`) and 3 (`228bd5f1`, `0694245c`) committed; Phase 4 waits for the user's go-ahead on `notify`; Phase 5 not started · **Branch:** `folder-workflow`
+> **Last updated:** 2026-10-22 · **Status:** Phases 1 (`b5d34059`), 2 (`4a3c7780`) and 3 (`228bd5f1`, `0694245c`) committed; Phase 4 done (commit `LRC-LIB-FOLDERS-WATCH`); Phase 5 not started · **Branch:** `folder-workflow`
 
 ## Status / handoff
 
@@ -23,13 +23,21 @@
   - UI: `crates/ui-egui/src/folder_scan.rs` (`FolderScans`, `tick`, `scan_menu`, `choose`), `Dialog::NeverScan`, `ImportTask::folder_scan()`. Tests: `catalog/src/tests_folder_scan.rs` (6), `engine/src/tests_folder_scan.rs` (8), `ui-egui/src/tests_folder_scan.rs` (3).
   - Checked by eye with headless snapshots (`lightcraft-cli snapshot --library … --script …`): the Scan submenu, and the Never dialog. Not tried in the windowed app.
   - Snapshot tip: a Folders row that leads to one folder opens by itself; clicking its toggle closes it.
+- **Phase 4, folder watching: committed as `LRC-LIB-FOLDERS-WATCH`** (new parity row, ✅), after a green `RUST_TEST_THREADS=2 cargo xtask ci`. The user approved `notify` 8.2 on 2026-10-22.
+  - Engine: `crates/engine/src/folder_watch.rs`: trait `FolderWatcher` (`watch`, `unwatch`), `MakeWatcher`, `Sink` (filters each `Change` and marks the folder it happened in), `FolderWatch` in `Session.folder_watch` (`start`, `sync`, `take`, `wait`, `roots`, `syncing`), `native` (notify, `follow_symlinks(false)`, compiled out on wasm). `QUIET` 2 s, `MAX_WAIT` 10 s, `MAX_DIRTY` 10,000 (past that: rescan all). `ScanJob::of_changed`, `Session::sync_folder_watch` (skips the library). Command `library.folderWatch`.
+  - What counts as a change: Create / Remove / Rename / Modify(Name|Other) of anything; Modify(Data|Metadata|Any) and Close(Write) only for supported image files. Hidden entries (below the watched root), the library, and folders no longer watched are dropped in the sink, before the UI is woken.
+  - Watches are set up off the UI thread (one recursive inotify walk can be long on a big tree), with an activity row "Watching folders for changes" (`Cancel::No`).
+  - UI: `Services.folder_watcher` (desktop: `native`; web and tests: `None` or a fake). `folder_scan::tick` starts the watcher the first time there are Always folders, re-syncs when they change, takes the due folders into `FolderScans.changed`, and scans them when nothing else imports (a due full scan clears them). Wake-ups come from the watcher thread (`ctx.request_repaint`), so there's no idle polling.
+  - Tests: `engine/src/tests_folder_watch.rs` (5, including one on the real `notify` watcher), `ui-egui/src/tests_folder_scan.rs` `a_watched_folder_brings_new_photos_in_without_waiting_for_the_rescan`.
+  - `plan/STATUS.md` doesn't exist in this checkout, so the numbers are kept here and in the parity row.
+  - Measured with `cargo test -p lightcraft-engine --lib bench_folder_watch -- --ignored --nocapture` (Linux, this machine, warm OS file cache; 10,000 files in 1,011 folders, all already in the library): startup scan cold (`full`) 34 ms wall / 0.04 s CPU, mtime-warm 5 ms / 0 s; watch setup 36 ms / 0.03 s; 60 s idle with watches on: 0.00 s CPU; 100 PNGs copied (141 ms) imported 13.2 s later (1 changed-folder scan, 1 rescan), 0.17 s CPU. The 13 s is the 10 s settle rule (a fresh file needs its size seen twice, or to be 10 s old), not the watch.
 - **A slip earlier:** Phase 2 was started while Phase 1's first CI run was going, which mixed it into that run. Phase 2 was then taken out, Phase 1 was checked on its own, and Phase 2 was put back after the commit.
 
 ### Decisions so far
 - **Watcher crate: `notify` 8.2.** The licence check is **done, not pending**:
   - The repo has no `deny.toml` or cargo-deny step, and `AGENTS.md` / `CLAUDE.md` forbid only GPL/LGPL/AGPL code, so nothing rejects CC0-1.0.
   - The shared `craftrules` standards couldn't be read: there is no local checkout, and GitHub returns 404.
-  - `notify` is not in `Cargo.lock` yet. Add it in Phase 4.
+  - `notify` 8.2 was added in Phase 4 (engine, not on wasm).
 - **Phases 1 to 5 approved as written**, including Phase 4's watcher design and its measurements.
 - **The Folder Manager is its own dialog** (Phase 5), not a section inside Settings.
 - **Delete from Disk is skipped:** #1158 and #1851 aren't in this checkout.
@@ -40,7 +48,7 @@
 - **None set up yet.** No isolated build directory, no app launch, no test library and no test folder exist.
   - Builds and tests used the default `target/`.
   - The Copy Full Path tests use an in-memory `Session::new()` with fake paths (`/photos/trip/a.jpg`, …) and touch no disk.
-  - The Phase 4 test tree (about 10,000 files in 1,000 folders) has not been created.
+  - The Phase 4 test tree (10,000 files in 1,011 folders) is generated in the temp folder by the `#[ignore]` test `bench_folder_watch` and removed after.
 - What `CLAUDE.md` prescribes when one is needed:
   - A separate `CARGO_TARGET_DIR=target/agent-<name>`.
   - A control port in the 18000–19999 range (e.g. `cargo run --release -p lightcraft -- --control 18421`), never 7980.
@@ -48,14 +56,18 @@
   - Headless checks through `lightcraft-cli snapshot --demo …` or `ui.screenshot {"headless": true}`.
 
 ### Next step
-1. Before adding `notify` in Phase 4, **confirm with the user** that it's still OK. (Asked at the end of the 2026-10-22 session; no answer yet.)
-2. Phase 4 plugs into `folder_scan::ScanJob` (`roots` restricted to dirty folders) and `ui-egui/src/folder_scan.rs` (`FolderScans::request`).
-3. Never edit the working tree while a CI run is going. That is what mixed Phase 2 into Phase 1's first run.
+1. Phase 5, the Folder Manager. Its polling marker reads `Session.folder_watch.roots()` (`RootWatch.error`), or `library.folderWatch`.
+2. Never edit the working tree while a CI run is going. That is what mixed Phase 2 into Phase 1's first run.
 
 ### Unfinished or uncertain
 - Phase 1 (Copy Full Path) hasn't been checked in the running app; the clipboard can't be seen in a headless snapshot. Phase 2 was checked by a headless snapshot only, not in the windowed app.
 - On Windows, `native_path` turns a folder row's forward slashes into backslashes. That has only been tested through a `cfg!(windows)` branch in the test, never on Windows.
 - The whole workspace test suite can run out of memory on machines with little free RAM; `RUST_TEST_THREADS=2` keeps it in bounds. `tests_masking::edit_in_photocraft_opens_a_psd_copy` alone peaks at about 3.5 GB.
+- Phase 4 open points:
+  - Not tried in the windowed app; the real watcher is covered only by the engine test on Linux (inotify). macOS (FSEvents) and Windows are untested.
+  - The plan asked for the watch-limit notice as "toast and Activity". The activity stack only shows running tasks, so it's a toast (8 s, once per folder) plus `library.folderWatch`; a lasting notice is left for the Folder Manager.
+  - A Never folder inside an Always one is still watched (notify's recursive watch can't leave it out); its changes are dropped when the changed folders are scanned. It costs watches on Linux.
+  - A file closed after writing could count as settled at once, cutting the 13 s to about 2 s. Not done: Close(Write) isn't reported on macOS or Windows, and the settle rule also covers slow copies.
 - Phase 3 open points: the 300 px filter runs after the probe (a small file is read once, then skipped); a file that failed to import isn't retried until restart or until its folder changes; a photo emptied out of Recently Deleted returns only when its folder changes or with `library.scanFolders {full: true}`. The safety-interval rescans use the mtime skip (not `full`).
 
 This plan adds a Picasa-style folder workflow on top of what LightCraft already has. Existing features are
@@ -146,7 +158,7 @@ Each phase is one or more commits with one task id each. `cargo xtask ci` is gre
 - The mtime skip: an unchanged directory is not listed again (the lister counts its calls).
 - Undo of `folder.scanMode`.
 
-### Phase 4: File-system notifications for Always roots (needs your crate approval)
+### Phase 4: File-system notifications for Always roots (done)
 
 - Always roots are watched recursively. An event marks its directory dirty. Events are debounced (about 2 s), then only dirty directories are rescanned through the Phase 3 scanner, so the size-stable check still holds back half-copied files.
 - Full rescans still run at startup, after setting changes, and on the safety interval (Phase 3).
@@ -181,7 +193,7 @@ Each phase is one or more commits with one task id each. `cargo xtask ci` is gre
   - The hidden toggle.
   - The Never question, run from the manager.
 
-## Watcher crate: decision needed before Phase 4
+## Watcher crate (decided: `notify` 8.2)
 
 | Option | Licence | Calls C? |
 |---|---|---|
@@ -208,3 +220,4 @@ Earlier recommendation: **`notify`**. It is the standard choice and gives native
 | 2026-10-22 | Phase 3 done (two commits); catalog format 10; resolution rule, settle time and open points recorded |
 | 2026-10-22 | The file is committed instead of kept local |
 | 2026-10-22 | Machine-specific memory notes trimmed, the memory reaper note dropped |
+| 2026-10-22 | Phase 4 done (`notify` approved): watcher, changed-folder scans, the watch-limit notice, measurements |

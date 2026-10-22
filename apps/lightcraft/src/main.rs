@@ -714,6 +714,8 @@ fn services(cc: &eframe::CreationContext<'_>, log_file: Option<&std::path::Path>
         backup_library: None,
         restore_library: None,
         system_theme: appearance::service(),
+        // the folders set to Always are watched for changes (inotify, FSEvents, ReadDirectoryChangesW)
+        folder_watcher: Some(std::sync::Arc::new(lightcraft_engine::folder_watch::native)),
     }
 }
 

@@ -133,6 +133,30 @@ pub fn specs() -> Vec<CommandSpec> {
             }
         ),
         cmd!(
+            query "library.folderWatch",
+            "Folder Watch",
+            [],
+            None,
+            "{} → {active: bool (changes are watched for: the desktop app), syncing: bool (watches being set up), folders: [{path, watched: bool, polling: bool (left to the rescans every rescanMinutes), reason?, limit?: bool (the system's watch limit)}]} — how the folders set to Always are watched for changes",
+            always,
+            |s, _| {
+                let w = &s.folder_watch;
+                let folders: Vec<Value> = w
+                    .roots()
+                    .into_iter()
+                    .map(|(path, r)| {
+                        let mut f = json!({"path": path, "watched": r.watched, "polling": r.error.is_some()});
+                        if let Some(e) = r.error {
+                            f["reason"] = json!(e.message);
+                            f["limit"] = json!(e.limit);
+                        }
+                        f
+                    })
+                    .collect();
+                Ok(json!({"active": w.active(), "syncing": w.syncing(), "folders": folders}))
+            }
+        ),
+        cmd!(
             "library.scanFolders",
             "Scan Folders Now",
             [],

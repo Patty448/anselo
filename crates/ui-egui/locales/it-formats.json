@@ -305,5 +305,6 @@
   "Inherited from {from}": "Ereditato da {from}",
   "Not watched for changes ({why}); checked every {minutes} min instead.": "Modifiche non controllate ({why}); verificata ogni {minutes} min.",
   "{n} more…": "Altre {n}…",
-  "Can't list this folder: {e}": "Impossibile elencare questa cartella: {e}"
+  "Can't list this folder: {e}": "Impossibile elencare questa cartella: {e}",
+  "“{}” isn't connected or mounted": "«{}» non è collegato o montato"
 }

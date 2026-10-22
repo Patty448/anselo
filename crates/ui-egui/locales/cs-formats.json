@@ -305,5 +305,6 @@
   "Inherited from {from}": "Zděděno z {from}",
   "Not watched for changes ({why}); checked every {minutes} min instead.": "Změny se nesledují ({why}); místo toho se kontroluje každých {minutes} min.",
   "{n} more…": "{n} dalších…",
-  "Can't list this folder: {e}": "Složku nelze vypsat: {e}"
+  "Can't list this folder: {e}": "Složku nelze vypsat: {e}",
+  "“{}” isn't connected or mounted": "„{}“ není zapojen ani připojen"
 }

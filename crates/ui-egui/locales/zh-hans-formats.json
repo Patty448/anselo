@@ -305,5 +305,6 @@
   "Inherited from {from}": "继承自 {from}",
   "Not watched for changes ({why}); checked every {minutes} min instead.": "未监视更改（{why}）；改为每 {minutes} 分钟检查一次。",
   "{n} more…": "还有 {n} 个…",
-  "Can't list this folder: {e}": "无法列出此文件夹：{e}"
+  "Can't list this folder: {e}": "无法列出此文件夹：{e}",
+  "“{}” isn't connected or mounted": "“{}”未连接或未挂载"
 }

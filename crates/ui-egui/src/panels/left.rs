@@ -61,11 +61,12 @@ fn row_named(
     selected: bool,
     indent: f32,
 ) -> egui::Response {
-    row_sensed(app, ui, id, icon, label, spoken, count, selected, indent, Sense::click(), None)
+    row_sensed(app, ui, id, icon, label, spoken, count, selected, indent, Sense::click(), None, false)
 }
 
 /// [`row_named`] with the given `sense` (rows that can be dragged add `drag`) and a colour
-/// label's dot (`mark`) before the count.
+/// label's dot (`mark`) before the count; a `faded` row (a folder on a drive that isn't
+/// connected) is drawn dimmed.
 #[allow(clippy::too_many_arguments)]
 fn row_sensed(
     app: &mut LightcraftApp,
@@ -79,6 +80,7 @@ fn row_sensed(
     indent: f32,
     sense: Sense,
     mark: Option<egui::Color32>,
+    faded: bool,
 ) -> egui::Response {
     let label = if matches!(id, "all" | "recentlyAdded" | "picks" | "missing" | "recentlyDeleted") { crate::i18n::tr(label) } else { label };
     let t = Tokens::get(ui.ctx());
@@ -109,10 +111,22 @@ fn row_sensed(
         ui.painter(),
         Rect::from_min_size(pos2(r.left() + 18.0 + indent, r.center().y - 8.0), vec2(16.0, 16.0)),
         icon,
-        if selected { t.text } else { t.icon },
+        if selected {
+            t.text
+        } else if faded {
+            t.text_dim.gamma_multiply(0.6)
+        } else {
+            t.icon
+        },
     );
     let font = t.font(13.5);
-    let color = if selected { t.text } else { t.text_label };
+    let color = if selected {
+        t.text
+    } else if faded {
+        t.text_dim.gamma_multiply(0.75)
+    } else {
+        t.text_label
+    };
     // a count of nothing is there, but fainter: the rows that hold photos stand out
     let count_color = |n: usize| if n == 0 { t.text_dim.gamma_multiply(0.55) } else { t.text_dim };
     let count_galley = count.filter(|_| app.ui.show_counts).map(|n| ui.painter().layout_no_wrap(n.to_string(), t.font(12.5), count_color(n)));
@@ -1185,8 +1199,20 @@ fn albums_tree(app: &mut LightcraftApp, ui: &mut egui::Ui, all: &AlbumKids, pare
                 open = true;
                 set_tree_open(ui, open_id, true);
             }
-            let resp =
-                row_sensed(app, ui, &format!("folder:{}", a.id.0), Icon::Folder, &a.name, None, None, false, indent, Sense::click_and_drag(), None);
+            let resp = row_sensed(
+                app,
+                ui,
+                &format!("folder:{}", a.id.0),
+                Icon::Folder,
+                &a.name,
+                None,
+                None,
+                false,
+                indent,
+                Sense::click_and_drag(),
+                None,
+                false,
+            );
             // a folder is no source, so its row folds it too; the triangle is the same click, aimed
             let has_children = all.get(&Some(a.id)).is_some_and(|v| !v.is_empty());
             if resp.drag_started() {
@@ -1225,7 +1251,8 @@ fn albums_tree(app: &mut LightcraftApp, ui: &mut egui::Ui, all: &AlbumKids, pare
             // a smart album whose rules no longer check (an album they test was deleted) says so
             let problems = app.caches.smart_album_problems(&app.session.catalog).get(&a.id).cloned().unwrap_or_default();
             let label = if problems.is_empty() { label } else { format!("⚠ {label}") };
-            let mut resp = row_sensed(app, ui, &format!("album:{}", a.id.0), icon, &label, None, Some(n), sel, indent, Sense::click_and_drag(), None);
+            let mut resp =
+                row_sensed(app, ui, &format!("album:{}", a.id.0), icon, &label, None, Some(n), sel, indent, Sense::click_and_drag(), None, false);
             if !problems.is_empty() {
                 crate::widgets::register(ui.ctx(), format!("albumProblem:{}", a.id.0), resp.rect);
             }
@@ -1821,8 +1848,18 @@ fn folder_row(app: &mut LightcraftApp, ui: &mut egui::Ui, n: &FolderNode, id: &s
         Some(l) => format!("{name}, {}", crate::i18n::color_label(&app.session.catalog, l)),
         None => name.to_string(),
     };
+    // on a drive that isn't connected or mounted: dimmed, and its tooltip says why
+    let offline =
+        lightcraft_catalog::folders::disk_of(&format!("{}/", n.path)).and_then(|(mount, disk)| super::detail::disk_offline_text(app, &mount, &disk));
+    let spoken = match &offline {
+        Some(why) => format!("{spoken}, {why}"),
+        None => spoken,
+    };
     let mark = n.label.map(crate::theme::label_color);
-    let resp = row_sensed(app, ui, id, Icon::Folder, name, Some(&spoken), Some(n.count), sel, indent, Sense::click(), mark);
+    let resp = row_sensed(app, ui, id, Icon::Folder, name, Some(&spoken), Some(n.count), sel, indent, Sense::click(), mark, offline.is_some());
+    if offline.is_some() {
+        register(ui.ctx(), format!("libfolderOffline:{}", n.path), resp.rect);
+    }
     folder_drop_target(app, ui, &resp, n, open_id, open);
     let mut toggled = false;
     if !n.children.is_empty() {
@@ -1832,6 +1869,10 @@ fn folder_row(app: &mut LightcraftApp, ui: &mut egui::Ui, n: &FolderNode, id: &s
         row_menu(app, &tr, n);
     }
     let tip = if n.children.is_empty() { n.path.clone() } else { format!("{} ({})", n.path, crate::i18n::tr("includes the folders inside it")) };
+    let tip = match offline {
+        Some(why) => format!("{tip}\n{why}"),
+        None => tip,
+    };
     let resp = resp.on_hover_text(tip);
     if resp.clicked() && !toggled {
         if n.selectable {

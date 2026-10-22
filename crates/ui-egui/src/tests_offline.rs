@@ -242,3 +242,47 @@ fn import_reads_files_off_the_ui_thread_and_can_be_cancelled() {
     assert_eq!(calls.on(ui_thread), 0, "files were never read on the UI thread");
     let _ = std::fs::remove_dir_all(&dir);
 }
+
+/// Photos on a drive that isn't connected say so (issue: "No such file or directory (os error 2)"
+/// when an NTFS disk wasn't mounted): the loupe, its pill and Info name the drive, and the
+/// Folders panel dims the drive's rows. A file missing from a drive that is there says no such
+/// thing.
+#[test]
+fn photos_on_an_unplugged_drive_name_the_drive() {
+    let gone = "/media/lc-test/UNPLUGGED";
+    let mut s = Session::new();
+    for (i, path) in [format!("{gone}/Photos/a.jpg"), "/media/lc-test/PLUGGED/Photos/b.jpg".to_string()].into_iter().enumerate() {
+        let p = Photo::new(PhotoId(i as u64 + 1), Source::File { path }, "x.jpg", "JPEG", 600, 400, "2026-01-01T00:00:00");
+        s.catalog.apply(Op::AddPhoto { photo: Box::new(p) }).unwrap();
+    }
+    s.media.availability.set_probe(Arc::new(|_| false));
+    s.media.availability.set_mount_probe(Arc::new(move |m| m != gone));
+    let app = LightcraftApp::new(s, Services { png: None, ..Default::default() });
+    let mut h = Headless::new(app, [1400.0, 900.0], 1.0);
+    let r = h.request("ui.set", json!({"view": "photoGrid", "leftPanel": true}), Duration::from_secs(10));
+    assert_eq!(r["ok"], true, "{r}");
+    let has = |h: &Headless, id: &str| h.app.widgets.iter().any(|(w, _)| w == id);
+    h.step_until(Duration::from_secs(30), |h| has(h, &format!("libfolderOffline:{gone}")));
+    assert!(has(&h, &format!("libfolderOffline:{gone}")), "the unplugged drive's row is dimmed");
+    assert!(has(&h, &format!("libfolderOffline:{gone}/Photos")), "and so are its folders");
+    assert!(!h.app.widgets.iter().any(|(w, _)| w.starts_with("libfolderOffline:/media/lc-test/PLUGGED")), "a drive that is there isn't");
+
+    let why = |h: &Headless, id: u64| {
+        let p = h.app.session.catalog.photo(PhotoId(id)).unwrap().clone();
+        crate::panels::detail::disk_offline(&h.app, &p)
+    };
+    // (each file is checked off the UI thread once asked about)
+    h.step_until(Duration::from_secs(30), |h| {
+        why(h, 1).is_some() && h.app.session.media.availability.is_offline("/media/lc-test/PLUGGED/Photos/b.jpg")
+    });
+    assert_eq!(why(&h, 1).as_deref(), Some("“UNPLUGGED” isn't connected or mounted"));
+    assert_eq!(why(&h, 2), None, "a missing file on a connected drive is just missing");
+
+    // the loupe and Info say it where the render failed
+    h.app.session.execute("library.select", &json!({"ids": [1]})).unwrap();
+    h.app.ui.view = ViewMode::Detail;
+    h.app.ui.right = RightPanel::Info;
+    h.step_until(Duration::from_secs(30), |h| has(h, "info:diskOffline") && (has(h, "loupe:cantOpen") || has(h, "loupe:renderFailed")));
+    assert!(has(&h, "info:diskOffline"), "Info names the drive");
+    assert!(has(&h, "loupe:cantOpen") || has(&h, "loupe:renderFailed"), "the loupe says the photo can't be shown");
+}

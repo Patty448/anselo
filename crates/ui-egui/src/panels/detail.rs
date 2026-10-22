@@ -731,14 +731,14 @@ pub fn show(app: &mut LightcraftApp, ui: &mut egui::Ui) {
         if shown == "none" {
             match app.renderer.failure_of(Slot::Main, id) {
                 Some(e) => {
-                    p.text(
-                        canvas.center() - vec2(0.0, 10.0),
-                        Align2::CENTER_CENTER,
-                        crate::i18n::tr("This photo can't be opened"),
-                        t.semibold(14.0),
-                        t.text,
-                    );
-                    p.text(canvas.center() + vec2(0.0, 12.0), Align2::CENTER_CENTER, e, t.font(12.0), t.text_dim);
+                    // an unplugged drive says so, not "No such file or directory"
+                    let photo = app.session.catalog.photo(id);
+                    let offline = photo.is_some_and(|p| original_offline(app, p));
+                    let why = photo.and_then(|p| disk_offline(app, p)).unwrap_or_else(|| e.to_string());
+                    let heading = if offline { "Original offline · no smart preview" } else { "This photo can't be opened" };
+                    p.text(canvas.center() - vec2(0.0, 10.0), Align2::CENTER_CENTER, crate::i18n::tr(heading), t.semibold(14.0), t.text);
+                    let r = p.text(canvas.center() + vec2(0.0, 12.0), Align2::CENTER_CENTER, &why, t.font(12.0), t.text_dim);
+                    register(ui.ctx(), "loupe:cantOpen", r);
                 }
                 None => {
                     p.text(canvas.center(), Align2::CENTER_CENTER, crate::i18n::tr("Rendering…"), t.font(13.0), t.text_dim);
@@ -1295,11 +1295,34 @@ pub(crate) fn failed_pill(
     id: &str,
     error: &str,
 ) {
-    let offline = matches!(&photo.source, lightcraft_catalog::Source::File { path } if app.session.media.availability.is_offline(path));
+    let offline = original_offline(app, photo);
     let text = crate::i18n::tr(if offline { "Original offline · no smart preview" } else { "This photo can't be opened" });
     let r = loupe_pill(ui, canvas, over, navigator, id, text, true);
-    let resp = ui.interact(r, egui::Id::new(("render-failed", id)), Sense::hover()).on_hover_text(error);
+    let error = disk_offline(app, photo).unwrap_or_else(|| error.to_string());
+    let resp = ui.interact(r, egui::Id::new(("render-failed", id)), Sense::hover()).on_hover_text(&error);
     resp.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Label, true, format!("{text}: {error}")));
+}
+
+/// Whether the library knows `photo`'s original is missing (a cached answer, checked off the UI
+/// thread; unknown counts as there).
+pub(crate) fn original_offline(app: &LightcraftApp, photo: &lightcraft_catalog::Photo) -> bool {
+    matches!(&photo.source, lightcraft_catalog::Source::File { path } if app.session.media.availability.is_offline(path))
+}
+
+/// “STORAGEDISK2” isn't connected or mounted: why `photo`'s original is missing, when that is
+/// why (its disk or share is known to be gone; checked off the UI thread like the file).
+pub(crate) fn disk_offline(app: &LightcraftApp, photo: &lightcraft_catalog::Photo) -> Option<String> {
+    let lightcraft_catalog::Source::File { path } = &photo.source else { return None };
+    if !app.session.media.availability.is_offline(path) {
+        return None;
+    }
+    let (mount, name) = lightcraft_catalog::folders::disk_of(path)?;
+    disk_offline_text(app, &mount, &name)
+}
+
+/// “`name`” isn't connected or mounted, when the disk or share at `mount` is known to be gone.
+pub(crate) fn disk_offline_text(app: &LightcraftApp, mount: &str, name: &str) -> Option<String> {
+    (app.session.media.availability.disk_online(mount) == Some(false)).then(|| crate::i18n::tr_format!("“{}” isn't connected or mounted", name))
 }
 
 fn quick_name(q: lightcraft_engine::media::QuickSource) -> &'static str {

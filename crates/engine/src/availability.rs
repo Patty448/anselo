@@ -14,6 +14,8 @@ use std::time::Duration;
 
 /// Checks whether a path exists (injectable: tests use a slow one).
 pub type ExistsProbe = Arc<dyn Fn(&str) -> bool + Send + Sync>;
+/// Checks whether a disk or share is mounted at a path (injectable like [`ExistsProbe`]).
+pub type MountProbe = Arc<dyn Fn(&str) -> bool + Send + Sync>;
 /// Called (from the worker) when an answer changed, e.g. to repaint the UI.
 pub type Waker = Arc<dyn Fn() + Send + Sync>;
 
@@ -24,6 +26,28 @@ fn fs_exists(path: &str) -> bool {
     // the browser build has no file system: its originals are always "there"
     cfg!(target_arch = "wasm32") || std::path::Path::new(path).exists()
 }
+
+/// Whether a disk or share is mounted at `mount` (as [`crate::catalog::folders::disk_of`] gives
+/// it): its folder is there and, under the Linux mount folders, is a mount point rather than the
+/// empty folder an unmounted disk leaves behind (a drive in `/etc/fstab` that isn't mounted).
+fn fs_mounted(mount: &str) -> bool {
+    if cfg!(target_arch = "wasm32") {
+        return true;
+    }
+    let p = std::path::Path::new(mount);
+    let Ok(m) = std::fs::metadata(p) else { return false };
+    #[cfg(unix)]
+    if ["/mnt/", "/media/", "/run/media/"].iter().any(|d| mount.starts_with(d))
+        && let Some(Ok(parent)) = p.parent().map(std::fs::metadata)
+    {
+        use std::os::unix::fs::MetadataExt;
+        return m.dev() != parent.dev();
+    }
+    m.is_dir()
+}
+
+/// Cache keys of disks ([`Availability::disk_online`]) start with this, which no path can.
+const DISK: &str = "\0disk:";
 
 #[derive(Default)]
 struct State {
@@ -44,13 +68,14 @@ fn lock(m: &Mutex<State>) -> MutexGuard<'_, State> {
 #[derive(Clone)]
 pub struct Availability {
     probe: ExistsProbe,
+    mounted: MountProbe,
     background: Option<Waker>,
     state: Arc<Mutex<State>>,
 }
 
 impl Default for Availability {
     fn default() -> Self {
-        Self { probe: Arc::new(fs_exists), background: None, state: Arc::default() }
+        Self { probe: Arc::new(fs_exists), mounted: Arc::new(fs_mounted), background: None, state: Arc::default() }
     }
 }
 
@@ -64,6 +89,14 @@ impl Availability {
     /// Replace the existence check (tests: a slow or counting probe). Forgets cached answers.
     pub fn set_probe(&mut self, probe: ExistsProbe) {
         self.probe = probe;
+        let mut st = lock(&self.state);
+        st.known.clear();
+        st.generation += 1;
+    }
+
+    /// Replace the mount check (tests: a disk that is unplugged). Forgets cached answers.
+    pub fn set_mount_probe(&mut self, mounted: MountProbe) {
+        self.mounted = mounted;
         let mut st = lock(&self.state);
         st.known.clear();
         st.generation += 1;
@@ -93,6 +126,20 @@ impl Availability {
         let Some(wake) = &self.background else {
             return Some((self.probe)(path));
         };
+        self.cached(path.to_string(), wake)
+    }
+
+    /// Is a disk or share mounted at `mount` (from [`crate::catalog::folders::disk_of`])? Answered
+    /// as [`Self::exists`] is: now, or from the cache with the worker checking.
+    pub fn disk_online(&self, mount: &str) -> Option<bool> {
+        let Some(wake) = &self.background else {
+            return Some((self.mounted)(mount));
+        };
+        self.cached(format!("{DISK}{mount}"), wake)
+    }
+
+    fn cached(&self, key: String, wake: &Waker) -> Option<bool> {
+        let path = key.as_str();
         let mut st = lock(&self.state);
         let now = std::time::Instant::now();
         let cached = st.known.get(path).copied();
@@ -125,7 +172,7 @@ impl Availability {
     }
 
     fn spawn_worker(&self, wake: Waker) {
-        let (state, probe) = (self.state.clone(), self.probe.clone());
+        let (state, probe, mounted) = (self.state.clone(), self.probe.clone(), self.mounted.clone());
         let started = std::thread::Builder::new().name("lc-availability".into()).spawn(move || {
             loop {
                 let path = {
@@ -136,7 +183,10 @@ impl Availability {
                     };
                     p
                 };
-                let ok = probe(&path);
+                let ok = match path.strip_prefix(DISK) {
+                    Some(mount) => mounted(mount),
+                    None => probe(&path),
+                };
                 let changed = {
                     let mut st = lock(&state);
                     st.queued.remove(&path);
@@ -211,5 +261,34 @@ mod tests {
         assert_eq!(on_caller.load(Ordering::SeqCst), 0, "never probed on the calling thread");
         assert!(woke.load(Ordering::SeqCst) >= 2);
         assert!(a.generation() >= 2);
+    }
+
+    #[test]
+    fn a_disk_is_checked_apart_from_the_files_on_it() {
+        let mut a = Availability::default();
+        a.set_probe(Arc::new(|_| false));
+        a.set_mount_probe(Arc::new(|m| m == "/media/me/usb"));
+        assert_eq!(a.disk_online("/media/me/usb"), Some(true));
+        assert_eq!(a.disk_online("/media/me/old"), Some(false));
+        a.run_in_background(Arc::new(|| {}));
+        let deadline = std::time::Instant::now() + Duration::from_secs(20);
+        while a.disk_online("/media/me/usb").is_none() && std::time::Instant::now() < deadline {
+            std::thread::sleep(Duration::from_millis(10));
+        }
+        assert_eq!(a.disk_online("/media/me/usb"), Some(true), "the disk's own answer");
+        assert_eq!(a.exists("/media/me/usb"), None, "not the same question as the folder's file check");
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn an_empty_mount_folder_is_not_a_mounted_disk() {
+        let dir = std::env::temp_dir().join(format!("lc-mounted-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let p = dir.to_string_lossy().to_string();
+        assert!(fs_mounted(&p), "a folder outside the mount folders counts when it is there");
+        assert!(!fs_mounted(&format!("{p}/gone")));
+        assert!(!fs_mounted("/mnt/lightcraft-no-such-disk"));
+        assert!(fs_mounted("/"));
+        let _ = std::fs::remove_dir_all(&dir);
     }
 }

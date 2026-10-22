@@ -807,6 +807,10 @@ fn info(app: &mut LightcraftApp, ui: &mut egui::Ui, id: PhotoId) {
                 };
                 ui.add_space(6.0);
                 ui.label(egui::RichText::new(crate::i18n::tr(text)).color(if online { t.text_dim } else { t.accent }));
+                if let Some(why) = super::detail::disk_offline(app, &p) {
+                    let r = ui.label(egui::RichText::new(why).color(t.text_dim)).rect;
+                    crate::widgets::register(ui.ctx(), "info:diskOffline", r);
+                }
             }
         }
         ui.add_space(10.0);

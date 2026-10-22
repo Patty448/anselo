@@ -305,5 +305,6 @@
   "Inherited from {from}": "მემკვიდრეობით {from}-დან",
   "Not watched for changes ({why}); checked every {minutes} min instead.": "ცვლილებებს თვალყური არ ედევნება ({why}); სანაცვლოდ მოწმდება ყოველ {minutes} წუთში.",
   "{n} more…": "კიდევ {n}…",
-  "Can't list this folder: {e}": "ამ საქაღალდის ჩამოთვლა შეუძლებელია: {e}"
+  "Can't list this folder: {e}": "ამ საქაღალდის ჩამოთვლა შეუძლებელია: {e}",
+  "“{}” isn't connected or mounted": "„{}“ არ არის მიერთებული ან მიმაგრებული"
 }

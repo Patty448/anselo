@@ -305,5 +305,6 @@
   "Inherited from {from}": "Унаследовано от {from}",
   "Not watched for changes ({why}); checked every {minutes} min instead.": "Изменения не отслеживаются ({why}); папка проверяется каждые {minutes} мин.",
   "{n} more…": "Ещё {n}…",
-  "Can't list this folder: {e}": "Не удаётся получить список папки: {e}"
+  "Can't list this folder: {e}": "Не удаётся получить список папки: {e}",
+  "“{}” isn't connected or mounted": "«{}» не подключён или не смонтирован"
 }

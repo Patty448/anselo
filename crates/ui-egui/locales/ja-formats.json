@@ -305,5 +305,6 @@
   "Inherited from {from}": "{from} から継承",
   "Not watched for changes ({why}); checked every {minutes} min instead.": "変更を監視していません（{why}）。代わりに {minutes} 分ごとに確認します。",
   "{n} more…": "ほか {n} 件…",
-  "Can't list this folder: {e}": "このフォルダーを一覧できません：{e}"
+  "Can't list this folder: {e}": "このフォルダーを一覧できません：{e}",
+  "“{}” isn't connected or mounted": "「{}」が接続またはマウントされていません"
 }

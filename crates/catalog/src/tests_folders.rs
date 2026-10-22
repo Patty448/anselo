@@ -491,3 +491,16 @@ fn sort_by_date_counts_one_folder_however_spelled_and_skips_deleted() {
     assert_eq!(by_date(&c), vec![("trip".into(), Some("2021-01-01T00:00:00".into()))]);
     assert!(Catalog::new().folders_by_date().is_empty());
 }
+
+#[test]
+fn the_disk_a_file_is_on_is_named_unless_it_is_the_startup_disk() {
+    use crate::folders::disk_of;
+    let d = disk_of;
+    assert_eq!(d("/media/me/STORAGEDISK2/Photos/2024/a.nef"), Some(("/media/me/STORAGEDISK2".into(), "STORAGEDISK2".into())));
+    assert_eq!(d("/run/media/me/usb/a.jpg"), Some(("/run/media/me/usb".into(), "usb".into())));
+    assert_eq!(d("/Volumes/nas/a.jpg"), Some(("/Volumes/nas".into(), "nas".into())));
+    assert_eq!(d("D:\\Photos\\a.jpg"), Some(("D:/".into(), "D:".into())));
+    assert_eq!(d("\\\\srv\\photos\\a.jpg"), Some(("//srv/photos".into(), "//srv/photos".into())));
+    assert_eq!(d("/home/me/Pictures/a.jpg"), None, "the startup disk");
+    assert_eq!(d("a.jpg"), None);
+}

@@ -305,5 +305,6 @@
   "Inherited from {from}": "Hérité de {from}",
   "Not watched for changes ({why}); checked every {minutes} min instead.": "Changements non surveillés ({why}) ; vérifié toutes les {minutes} min à la place.",
   "{n} more…": "{n} de plus…",
-  "Can't list this folder: {e}": "Impossible de lister ce dossier : {e}"
+  "Can't list this folder: {e}": "Impossible de lister ce dossier : {e}",
+  "“{}” isn't connected or mounted": "« {} » n’est pas branché ou monté"
 }

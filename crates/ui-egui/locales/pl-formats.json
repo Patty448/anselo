@@ -305,5 +305,6 @@
   "Inherited from {from}": "Odziedziczone z {from}",
   "Not watched for changes ({why}); checked every {minutes} min instead.": "Zmiany nie są obserwowane ({why}); zamiast tego sprawdzany co {minutes} min.",
   "{n} more…": "Jeszcze {n}…",
-  "Can't list this folder: {e}": "Nie można wyświetlić zawartości folderu: {e}"
+  "Can't list this folder: {e}": "Nie można wyświetlić zawartości folderu: {e}",
+  "“{}” isn't connected or mounted": "„{}” nie jest podłączony ani zamontowany"
 }

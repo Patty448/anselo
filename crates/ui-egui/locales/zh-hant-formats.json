@@ -305,5 +305,6 @@
   "Inherited from {from}": "繼承自 {from}",
   "Not watched for changes ({why}); checked every {minutes} min instead.": "未監視變更（{why}）；改為每 {minutes} 分鐘檢查一次。",
   "{n} more…": "還有 {n} 個…",
-  "Can't list this folder: {e}": "無法列出此資料夾：{e}"
+  "Can't list this folder: {e}": "無法列出此資料夾：{e}",
+  "“{}” isn't connected or mounted": "「{}」未連接或未掛載"
 }

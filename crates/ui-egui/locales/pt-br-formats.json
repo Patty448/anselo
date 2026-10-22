@@ -305,5 +305,6 @@
   "Inherited from {from}": "Herdado de {from}",
   "Not watched for changes ({why}); checked every {minutes} min instead.": "Mudanças não observadas ({why}); verificada a cada {minutes} min.",
   "{n} more…": "Mais {n}…",
-  "Can't list this folder: {e}": "Não é possível listar esta pasta: {e}"
+  "Can't list this folder: {e}": "Não é possível listar esta pasta: {e}",
+  "“{}” isn't connected or mounted": "“{}” não está conectado nem montado"
 }

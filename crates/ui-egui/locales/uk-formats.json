@@ -305,5 +305,6 @@
   "Inherited from {from}": "Успадковано від {from}",
   "Not watched for changes ({why}); checked every {minutes} min instead.": "За змінами не стежать ({why}); теку перевіряють кожні {minutes} хв.",
   "{n} more…": "Ще {n}…",
-  "Can't list this folder: {e}": "Не вдається показати вміст теки: {e}"
+  "Can't list this folder: {e}": "Не вдається показати вміст теки: {e}",
+  "“{}” isn't connected or mounted": "«{}» не під’єднано або не змонтовано"
 }

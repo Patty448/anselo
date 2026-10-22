@@ -260,6 +260,20 @@ pub fn volume_of(p: &crate::Photo) -> Option<String> {
     place(dir).map(|pl| folder_key(&pl.mount))
 }
 
+/// The disk or share the file `path` is on, other than the startup disk: where it is mounted
+/// (`/media/me/usb`, `D:/`, `//srv/share`) and what to call it (`usb`, `D:`, `photos on srv`).
+/// `None` for a file on the startup disk (it can't be unplugged) or a path that is not absolute.
+pub fn disk_of(path: &str) -> Option<(String, String)> {
+    let dir = path.rfind(['/', '\\']).and_then(|i| path.get(..i.max(1)))?;
+    let pl = place(dir)?;
+    if pl.mount == "/" {
+        return None;
+    }
+    // a drive letter alone (`D:`) means that drive's current folder: its root is `D:/`
+    let mount = if pl.mount.len() == 2 && pl.mount.ends_with(':') { format!("{}/", pl.mount) } else { pl.mount };
+    Some((mount, pl.volume))
+}
+
 /// Whether `path` is a whole disk or share (`/`, `C:\`, `\\srv\share`, `/Volumes/nas`), not a
 /// folder in one.
 pub fn is_disk_root(path: &str) -> bool {

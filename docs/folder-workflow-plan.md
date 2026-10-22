@@ -1,6 +1,6 @@
 # Folder workflow plan (Picasa-style)
 
-> **Last updated:** 2026-10-22 · **Status:** Phases 1 (`b5d34059`), 2 (`4a3c7780`) and 3 (`228bd5f1`, `0694245c`) committed; Phase 4 (`2e85759f`) and Phase 5 (commit `LRC-LIB-FOLDERS-MANAGER`) done: the plan is complete · **Branch:** `folder-workflow`
+> **Last updated:** 2026-10-22 · **Status:** Phases 1 (`b5d34059`), 2 (`4a3c7780`) and 3 (`228bd5f1`, `0694245c`) committed; Phase 4 (`2e85759f`) and Phase 5 (`779c4127`) done: the plan is complete; the unplugged-disk message (`62524ac1`); upstream 0.11.0 merged in · **Branch:** `folder-workflow`
 
 ## Status / handoff
 
@@ -62,6 +62,10 @@
   - A control port in the 18000–19999 range (e.g. `cargo run --release -p lightcraft -- --control 18421`), never 7980.
   - A scratch subfolder.
   - Headless checks through `lightcraft-cli snapshot --demo …` or `ui.screenshot {"headless": true}`.
+
+- **Upstream 0.11.0 merged in** (2026-10-22): `storytold/lightcraft` main (475 commits) merged into `folder-workflow`. Conflicts were additions on both sides (menus: Copy Full Path beside Show in Folders; `Dialog::FolderManager` beside `Dialog::ViewOptions`; locale keys). Upstream added fi, id, sv and vi: the folder workflow's 34 strings and 11 formats were translated into them. Upstream's catalog is still format 9; this branch's 10 must stay above whatever upstream picks next (check `journal.rs` `VERSION` on every merge).
+- **Unplugged disk** (`62524ac1`, LRC-LIB-MISSING): a photo whose disk isn't mounted says “<disk>” isn't connected or mounted (loupe, pill, Info) and the disk's Folders rows are dimmed; `catalog::folders::disk_of`, `Availability::disk_online`.
+- **Tried in the windowed app on the user's library** (2026-10-22): the NTFS disk wasn't mounted at first (fixed by mounting; led to the message above). The user's library opened at 1.7 GB RSS and settled at 2.3 GB after rescanning its Always folders; the first full scan of `/home/patty` and the photo disk peaked near 4 GB, and with a cargo build alongside the 16 GB machine ran out of memory (OOM kill). Setting the whole home folder to Always added 174 stray images.
 
 ### Next step
 1. The five phases are done. What's left is checking in the windowed app (all phases), the open points below, and merging `folder-workflow` into `main` when the user wants.
@@ -236,3 +240,4 @@ Earlier recommendation: **`notify`**. It is the standard choice and gives native
 | 2026-10-22 | Machine-specific memory notes trimmed, the memory reaper note dropped |
 | 2026-10-22 | Phase 4 done (`notify` approved): watcher, changed-folder scans, the watch-limit notice, measurements |
 | 2026-10-22 | Phase 5 done: the Folder Manager; the Never question asked inside it |
+| 2026-10-22 | Unplugged-disk message; upstream 0.11.0 merged in; first run on the user's library recorded |

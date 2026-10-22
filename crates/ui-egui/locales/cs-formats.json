@@ -296,5 +296,8 @@
   "Move {n} photo{} to “{}”": "Přesunout do „{1}“ fotografie: {n}{0:.0}",
   "Move {n} photo{} to “{}”?": "Přesunout do „{1}“ fotografie: {n}{0:.0}?",
   "Moved {n} photo{} to “{}”. Edit → Undo moves them back.": "Do „{1}“ přesunuto fotografií: {n}{0:.0}. Úpravy → Zpět je vrátí.",
-  " · {} small image{} skipped": " · přeskočeno malých obrázků: {}{:.0}"
+  " · {} small image{} skipped": " · přeskočeno malých obrázků: {}{:.0}",
+  "Also remove the {count} photo{} from “{name}” that are already in the library?": "Odebrat z knihovny také fotky ze složky „{name}“, které už v ní jsou ({count}){:.0}?",
+  "Folder scan: added {} photo{}": "Prohledání složek: přidáno fotek: {}{:.0}",
+  "Inherit (from {from}: {mode})": "Zdědit (z {from}: {mode})"
 }

@@ -152,6 +152,12 @@ impl ScanRules {
         }
     }
 
+    /// The rules without the mode set on folder `path` itself (what it would inherit).
+    pub fn without(&self, path: &str) -> ScanRules {
+        let key = record_key(path);
+        ScanRules { records: self.records.iter().filter(|(k, _)| Some(k) != key.as_ref()).cloned().collect(), defaults: self.defaults.clone() }
+    }
+
     /// The folders set to `mode`, by identity key.
     pub fn set_to(&self, mode: ScanMode) -> impl Iterator<Item = &str> {
         self.records.iter().filter(move |(_, m)| *m == mode).map(|(k, _)| k.as_str())

@@ -1129,6 +1129,7 @@ fn folder_tree(
         if ui.button(crate::i18n::tr("Copy Full Path")).clicked() {
             let _ = app.run("app.copyPath", json!({"paths": [path]}));
         }
+        crate::folder_scan::scan_menu(app, ui, path, &lightcraft_catalog::folders::folder_label(path));
         if let Some(held) = &held {
             synchronize_item(app, ui, &held.0, &held.1);
         }
@@ -2132,6 +2133,7 @@ fn folder_menu_for_library(app: &mut LightcraftApp, resp: &egui::Response, n: &F
             ui.close();
         }
         folder_label_menu(app, ui, n);
+        crate::folder_scan::scan_menu(app, ui, path, &label);
         locate_missing_item(app, ui, n);
         synchronize_item(app, ui, n, &label);
         ui.separator();

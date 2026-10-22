@@ -296,5 +296,8 @@
   "Move {n} photo{} to “{}”": "Move {n} photo{} to “{}”",
   "Move {n} photo{} to “{}”?": "Move {n} photo{} to “{}”?",
   "Moved {n} photo{} to “{}”. Edit → Undo moves them back.": "Moved {n} photo{} to “{}”. Edit → Undo moves them back.",
-  " · {} small image{} skipped": " · გამოტოვებული მცირე სურათები: {}{:.0}"
+  " · {} small image{} skipped": " · გამოტოვებული მცირე სურათები: {}{:.0}",
+  "Also remove the {count} photo{} from “{name}” that are already in the library?": "ამოიშალოს ბიბლიოთეკიდან „{name}“-ის ფოტოებიც, რომლებიც უკვე მასშია ({count}){:.0}?",
+  "Folder scan: added {} photo{}": "საქაღალდეების სკანირება: დაემატა ფოტო: {}{:.0}",
+  "Inherit (from {from}: {mode})": "მემკვიდრეობით ({from}: {mode})"
 }

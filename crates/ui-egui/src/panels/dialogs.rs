@@ -267,6 +267,7 @@ pub fn show(app: &mut LightcraftApp, ctx: &egui::Context) {
         Dialog::DeleteEffects { .. } => "Delete Effect Presets",
         Dialog::RemoveFolder { disk: true, .. } => "Remove Disk from Library",
         Dialog::RemoveFolder { .. } => "Remove Folder from Library",
+        Dialog::NeverScan { .. } => "Never Scan Folder",
         Dialog::SynchronizeFolder { .. } => "Synchronize Folder",
         // (nothing to download from in this build: the dialog explains the manual install)
         Dialog::SamModel { .. } if sam_by_hand(&app.session.segmenter) => "Install the SAM 3 Model",
@@ -1265,6 +1266,19 @@ pub fn show(app: &mut LightcraftApp, ctx: &egui::Context) {
                             .color(t.text_dim),
                     );
                 }
+                Dialog::NeverScan { name, count, path } => {
+                    ui.label(crate::i18n::tr_format!(
+                        "Also remove the {count} photo{} from “{name}” that are already in the library?",
+                        if *count == 1 { "" } else { "s" },
+                        name = name,
+                        count = count
+                    ));
+                    ui.label(egui::RichText::new(path.as_str()).color(t.text_dim));
+                    ui.label(
+                        egui::RichText::new(crate::i18n::tr("They move to Recently Deleted and can be restored; no file on disk is touched."))
+                            .color(t.text_dim),
+                    );
+                }
                 Dialog::About => {
                     ui.set_min_width(680.0);
                     let tab_id = egui::Id::new("about_tab");
@@ -1337,6 +1351,7 @@ pub fn show(app: &mut LightcraftApp, ctx: &egui::Context) {
                     Dialog::SamModel { .. } if sam_running || sam_installed || sam_nowhere => "Close",
                     Dialog::SamModel { .. } => "Not Now",
                     Dialog::LightroomResult { .. } => "Close",
+                    Dialog::NeverScan { .. } => "Keep Them",
                     _ => "Cancel",
                 };
                 let add_label;
@@ -1365,6 +1380,7 @@ pub fn show(app: &mut LightcraftApp, ctx: &egui::Context) {
                     Dialog::KeywordTag { editing: None, .. } => "Create",
                     Dialog::KeywordTag { .. } => "Save",
                     Dialog::RemoveFolder { .. } => "Remove",
+                    Dialog::NeverScan { .. } => "Remove from Library",
                     Dialog::LightroomCatalog { .. } => "Import Lightroom Catalog…",
                     Dialog::SynchronizeFolder { .. } => "Synchronize",
                     Dialog::SamModel { then: Some(_), .. } if sam_installed => "Continue",
@@ -1934,6 +1950,8 @@ pub fn confirm_dialog(app: &mut LightcraftApp, dlg: &Dialog) -> Result<serde_jso
         }
         Dialog::DeleteEffects { names } => app.run("mask.deleteEffect", json!({"names": names})),
         Dialog::RemoveFolder { path, disk, .. } => app.run("library.removeFolder", json!({"path": path, "disk": disk})),
+        // (the question named the photos: a folder holding whole disks goes as asked)
+        Dialog::NeverScan { path, .. } => app.run("library.removeFolder", json!({"path": path, "disk": true})),
         d @ Dialog::SynchronizeFolder { .. } => crate::sync::confirm(app, d),
         Dialog::About | Dialog::Shortcuts | Dialog::Settings { .. } | Dialog::ManageEffects { .. } => Ok(serde_json::Value::Null),
     }
@@ -2296,9 +2314,11 @@ pub enum ConfirmStyle {
 
 pub fn confirm_style(dlg: &Dialog) -> ConfirmStyle {
     match dlg {
-        Dialog::ConfirmDelete { .. } | Dialog::DeleteKeyword { .. } | Dialog::DeleteEffects { .. } | Dialog::RemoveFolder { .. } => {
-            ConfirmStyle::Plain
-        }
+        Dialog::ConfirmDelete { .. }
+        | Dialog::DeleteKeyword { .. }
+        | Dialog::DeleteEffects { .. }
+        | Dialog::RemoveFolder { .. }
+        | Dialog::NeverScan { .. } => ConfirmStyle::Plain,
         _ if only_shows(dlg) => ConfirmStyle::Plain,
         _ => ConfirmStyle::Primary,
     }

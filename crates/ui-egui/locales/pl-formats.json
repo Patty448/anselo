@@ -296,5 +296,8 @@
   "Move {n} photo{} to “{}”": "Przenieś do „{1}” — zdjęcia: {n}{0:.0}",
   "Move {n} photo{} to “{}”?": "Przenieść do „{1}” — zdjęcia: {n}{0:.0}?",
   "Moved {n} photo{} to “{}”. Edit → Undo moves them back.": "Przeniesiono do „{1}” — zdjęcia: {n}{0:.0}. Edytuj → Cofnij przywróci je.",
-  " · {} small image{} skipped": " · pominięte małe obrazy: {}{:.0}"
+  " · {} small image{} skipped": " · pominięte małe obrazy: {}{:.0}",
+  "Also remove the {count} photo{} from “{name}” that are already in the library?": "Usunąć z biblioteki także zdjęcia z „{name}”, które już w niej są ({count}){:.0}?",
+  "Folder scan: added {} photo{}": "Skanowanie folderów: dodane zdjęcia: {}{:.0}",
+  "Inherit (from {from}: {mode})": "Dziedzicz (z {from}: {mode})"
 }

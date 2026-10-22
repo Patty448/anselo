@@ -2067,5 +2067,17 @@
   "Copy Full Path": "Kopírovat úplnou cestu",
   "Sort Folders": "Seřadit složky",
   "Sort by Folder Tree": "Seřadit podle stromu složek",
-  "Sort by Date": "Seřadit podle data"
+  "Sort by Date": "Seřadit podle data",
+  "Scan": "Prohledávání",
+  "Once": "Jednou",
+  "Never Scan Folder": "Neprohledávat složku",
+  "Keep Them": "Ponechat",
+  "Remove from Library": "Odebrat z knihovny",
+  "Scanning folders": "Prohledávání složek",
+  "Inherit (not scanned)": "Zdědit (neprohledává se)",
+  "Inherit (default: Never)": "Zdědit (výchozí: Nikdy)",
+  "Never: photos in this folder and the folders inside it are not added by scans": "Nikdy: fotky v této složce a jejích podsložkách se při prohledávání nepřidávají",
+  "Once: add the photos in this folder now; later ones are not looked for": "Jednou: přidat fotky z této složky hned; pozdější se nehledají",
+  "Always: add new photos in this folder whenever the folders are scanned": "Vždy: přidávat nové fotky z této složky při každém prohledání složek",
+  "Inherit: as the folder above says": "Zdědit: podle nadřazené složky"
 }

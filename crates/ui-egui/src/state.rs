@@ -1233,6 +1233,14 @@ pub enum Dialog {
         /// A whole disk or share (`library.removeFolder` takes it only on request).
         disk: bool,
     },
+    /// A folder was just set to Never: also take the photos already imported from it out of the
+    /// library (`library.removeFolder`), or keep them.
+    NeverScan {
+        path: String,
+        /// What the question calls it (a folder's last two names).
+        name: String,
+        count: usize,
+    },
     /// Synchronize Folder: what changed in a library folder on disk, and what to do about it
     /// (`folder.synchronize`; the scan runs in [`crate::sync`]).
     SynchronizeFolder {

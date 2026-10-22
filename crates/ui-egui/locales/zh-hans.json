@@ -2183,5 +2183,17 @@
   "Copy Full Path": "复制完整路径",
   "Sort Folders": "排序文件夹",
   "Sort by Folder Tree": "按文件夹树排序",
-  "Sort by Date": "按日期排序"
+  "Sort by Date": "按日期排序",
+  "Scan": "扫描",
+  "Once": "一次",
+  "Never Scan Folder": "从不扫描文件夹",
+  "Keep Them": "保留",
+  "Remove from Library": "从图库中移除",
+  "Scanning folders": "正在扫描文件夹",
+  "Inherit (not scanned)": "继承（不扫描）",
+  "Inherit (default: Never)": "继承（默认：从不）",
+  "Never: photos in this folder and the folders inside it are not added by scans": "从不：扫描不会添加此文件夹及其子文件夹中的照片",
+  "Once: add the photos in this folder now; later ones are not looked for": "一次：立即添加此文件夹中的照片；之后的照片不再查找",
+  "Always: add new photos in this folder whenever the folders are scanned": "始终：每次扫描文件夹时添加此文件夹中的新照片",
+  "Inherit: as the folder above says": "继承：与上级文件夹相同"
 }

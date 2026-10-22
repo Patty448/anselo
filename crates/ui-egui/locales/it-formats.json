@@ -296,5 +296,8 @@
   "Move {n} photo{} to “{}”": "Move {n} photo{} to “{}”",
   "Move {n} photo{} to “{}”?": "Move {n} photo{} to “{}”?",
   "Moved {n} photo{} to “{}”. Edit → Undo moves them back.": "Moved {n} photo{} to “{}”. Edit → Undo moves them back.",
-  " · {} small image{} skipped": " · {} immagini piccole saltate{:.0}"
+  " · {} small image{} skipped": " · {} immagini piccole saltate{:.0}",
+  "Also remove the {count} photo{} from “{name}” that are already in the library?": "Rimuovere anche dalla libreria le foto di «{name}» che vi sono già ({count}){:.0}?",
+  "Folder scan: added {} photo{}": "Scansione cartelle: {} foto aggiunte{:.0}",
+  "Inherit (from {from}: {mode})": "Eredita (da {from}: {mode})"
 }

@@ -296,5 +296,8 @@
   "Move {n} photo{} to “{}”": "Mover {n} foto{0} a “{1}”",
   "Move {n} photo{} to “{}”?": "¿Mover {n} foto{0} a “{1}”?",
   "Moved {n} photo{} to “{}”. Edit → Undo moves them back.": "{n} foto{0} movida{0} a “{1}”. Editar → Deshacer las devuelve.",
-  " · {} small image{} skipped": " · {} imágenes pequeñas omitidas{:.0}"
+  " · {} small image{} skipped": " · {} imágenes pequeñas omitidas{:.0}",
+  "Also remove the {count} photo{} from “{name}” that are already in the library?": "¿Quitar también de la biblioteca las fotos de «{name}» que ya están en ella ({count}){:.0}?",
+  "Folder scan: added {} photo{}": "Búsqueda en carpetas: {} foto{} añadida(s)",
+  "Inherit (from {from}: {mode})": "Heredar (de {from}: {mode})"
 }

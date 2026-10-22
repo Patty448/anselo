@@ -296,5 +296,8 @@
   "“{to}” is already a person. Combining them makes one person; Undo separates them again.": "“{to}” já é uma pessoa. Combiná-las deixa uma só; Desfazer as separa de novo.",
   "{what} merge added at {mp}: its full size, {full}, needs more memory than this computer has": "{what} mesclagem adicionada em {mp}: o tamanho completo, {full}, precisa de mais memória do que este computador tem",
   "{what} merge added at {mp}, the largest a panorama can be (its full size is {full})": "{what} mesclagem adicionada em {mp}, o maior tamanho possível para um panorama (tamanho completo: {full})",
-  " · {} small image{} skipped": " · {} imagens pequenas ignoradas{:.0}"
+  " · {} small image{} skipped": " · {} imagens pequenas ignoradas{:.0}",
+  "Also remove the {count} photo{} from “{name}” that are already in the library?": "Remover também da biblioteca as fotos de “{name}” que já estão nela ({count}){:.0}?",
+  "Folder scan: added {} photo{}": "Varredura de pastas: {} foto{} adicionada(s)",
+  "Inherit (from {from}: {mode})": "Herdar (de {from}: {mode})"
 }

@@ -296,5 +296,8 @@
   "“{to}” is already a person. Combining them makes one person; Undo separates them again.": "「{to}」はすでに別の人物です。まとめると1人になり、元に戻すと再び分かれます。",
   "{what} merge added at {mp}: its full size, {full}, needs more memory than this computer has": "{what}合成を{mp}で追加しました：フルサイズ（{full}）にはこのコンピューターのメモリが足りません",
   "{what} merge added at {mp}, the largest a panorama can be (its full size is {full})": "{what}合成を{mp}で追加しました。パノラマの最大サイズです（フルサイズ：{full}）",
-  " · {} small image{} skipped": "・小さい画像{}枚をスキップ{:.0}"
+  " · {} small image{} skipped": "・小さい画像{}枚をスキップ{:.0}",
+  "Also remove the {count} photo{} from “{name}” that are already in the library?": "「{name}」の写真のうち、すでにライブラリにある{count}枚もライブラリから除去しますか？{:.0}",
+  "Folder scan: added {} photo{}": "フォルダーのスキャン：{}枚の写真を追加しました{:.0}",
+  "Inherit (from {from}: {mode})": "継承（{from}：{mode}）"
 }

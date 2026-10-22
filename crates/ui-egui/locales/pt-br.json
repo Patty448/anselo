@@ -2190,5 +2190,17 @@
   "Copy Full Path": "Copiar caminho completo",
   "Sort Folders": "Ordenar pastas",
   "Sort by Folder Tree": "Ordenar por árvore de pastas",
-  "Sort by Date": "Ordenar por data"
+  "Sort by Date": "Ordenar por data",
+  "Scan": "Varredura",
+  "Once": "Uma vez",
+  "Never Scan Folder": "Nunca varrer a pasta",
+  "Keep Them": "Mantê-las",
+  "Remove from Library": "Remover da biblioteca",
+  "Scanning folders": "Varrendo pastas",
+  "Inherit (not scanned)": "Herdar (sem varredura)",
+  "Inherit (default: Never)": "Herdar (padrão: Nunca)",
+  "Never: photos in this folder and the folders inside it are not added by scans": "Nunca: as fotos desta pasta e das pastas dentro dela não são adicionadas pelas varreduras",
+  "Once: add the photos in this folder now; later ones are not looked for": "Uma vez: adicionar agora as fotos desta pasta; as posteriores não são procuradas",
+  "Always: add new photos in this folder whenever the folders are scanned": "Sempre: adicionar as fotos novas desta pasta a cada varredura das pastas",
+  "Inherit: as the folder above says": "Herdar: como a pasta acima"
 }

@@ -2344,5 +2344,17 @@
   "Copy Full Path": "Copiar ruta completa",
   "Sort Folders": "Ordenar carpetas",
   "Sort by Folder Tree": "Ordenar por árbol de carpetas",
-  "Sort by Date": "Ordenar por fecha"
+  "Sort by Date": "Ordenar por fecha",
+  "Scan": "Búsqueda",
+  "Once": "Una vez",
+  "Never Scan Folder": "No buscar nunca en la carpeta",
+  "Keep Them": "Conservarlas",
+  "Remove from Library": "Quitar de la biblioteca",
+  "Scanning folders": "Buscando en carpetas",
+  "Inherit (not scanned)": "Heredar (sin búsqueda)",
+  "Inherit (default: Never)": "Heredar (predeterminado: Nunca)",
+  "Never: photos in this folder and the folders inside it are not added by scans": "Nunca: las fotos de esta carpeta y sus subcarpetas no se añaden en las búsquedas",
+  "Once: add the photos in this folder now; later ones are not looked for": "Una vez: añadir ahora las fotos de esta carpeta; las posteriores no se buscan",
+  "Always: add new photos in this folder whenever the folders are scanned": "Siempre: añadir las fotos nuevas de esta carpeta cada vez que se buscan las carpetas",
+  "Inherit: as the folder above says": "Heredar: como indica la carpeta superior"
 }

@@ -262,6 +262,8 @@ pub struct ImportTask {
     pub cancelled: bool,
     /// Auto Import (the watched folder): the selection stays as it is, a short toast when done.
     auto: bool,
+    /// Added by a folder scan (the folders set to Always), not the Auto Import folder.
+    folder_scan: bool,
     /// Auto Import: the selection to keep.
     keep_selection: Option<lightcraft_engine::Selection>,
     /// The selection and source as the import last left them: a change between frames is the
@@ -283,6 +285,13 @@ impl ImportTask {
     /// An Auto Import (see [`ImportTask::auto`]).
     pub fn auto(mut self) -> Self {
         self.auto = true;
+        self
+    }
+
+    /// A folder scan's import: quiet like an Auto Import, said as a scan's.
+    pub fn folder_scan(mut self) -> Self {
+        self.auto = true;
+        self.folder_scan = true;
         self
     }
 
@@ -870,6 +879,8 @@ fn finish(app: &mut LightcraftApp, ctx: &egui::Context, task: ImportTask) {
     if task.auto {
         if !task.warnings.is_empty() {
             app.toast_for(ctx, xmp_warnings_text(&task.warnings), 8.0);
+        } else if task.imported > 0 && task.folder_scan {
+            app.toast(ctx, crate::i18n::tr_format!("Folder scan: added {} photo{}", task.imported, if task.imported == 1 { "" } else { "s" }));
         } else if task.imported > 0 {
             app.toast(ctx, crate::i18n::tr_format!("Auto Import: added {} photo{}", task.imported, if task.imported == 1 { "" } else { "s" }));
         }

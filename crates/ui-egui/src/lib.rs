@@ -17,6 +17,7 @@ pub mod date_picker;
 pub mod docking;
 pub mod export_task;
 mod focus_scan;
+pub mod folder_scan;
 pub mod headless;
 pub mod i18n;
 pub mod icons;
@@ -95,6 +96,8 @@ mod tests_filmstrip;
 mod tests_focus_point;
 #[cfg(test)]
 mod tests_folder_drop;
+#[cfg(test)]
+mod tests_folder_scan;
 #[cfg(test)]
 mod tests_folder_sort;
 #[cfg(test)]
@@ -446,6 +449,8 @@ pub struct LightcraftApp {
     pub sync_run: Option<sync::SyncRun>,
     /// A Lightroom catalog inspect/import in progress.
     pub lightroom: Option<lightroom_import::LightroomTask>,
+    /// When the folders set to Always are scanned, and the scan running.
+    pub folder_scans: folder_scan::FolderScans,
     /// Last terminal Lightroom result, exposed by the command's status/wait response.
     pub lightroom_last: Option<Value>,
     /// A completed import result waiting for another modal dialog to close.
@@ -546,6 +551,7 @@ impl LightcraftApp {
             sync_owns_changes: false,
             sync_run: None,
             lightroom: None,
+            folder_scans: Default::default(),
             lightroom_last: None,
             lightroom_result: None,
             shown_library: None,
@@ -1174,6 +1180,9 @@ impl LightcraftApp {
             }
             ctx.request_repaint_after(std::time::Duration::from_secs(3));
         }
+        // folder scans: the folders set to Always, on a worker thread (none in the browser build,
+        // which has no folders to walk)
+        folder_scan::tick(self, ctx);
         // automatic XMP writes that failed (a network share offline): tried again every few seconds once their files
         // are reachable, and said once when they start waiting and once when they're written
         #[cfg(not(target_arch = "wasm32"))]

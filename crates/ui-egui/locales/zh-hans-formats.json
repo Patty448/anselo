@@ -296,5 +296,8 @@
   "“{to}” is already a person. Combining them makes one person; Undo separates them again.": "“{to}”已经是另一个人。合并后成为一个人；撤销会再把他们分开。",
   "{what} merge added at {mp}: its full size, {full}, needs more memory than this computer has": "已添加 {what} 合并（{mp}）：完整尺寸（{full}）所需的内存超出了这台电脑的内存",
   "{what} merge added at {mp}, the largest a panorama can be (its full size is {full})": "已添加 {what} 合并（{mp}），这是全景图的最大尺寸（完整尺寸：{full}）",
-  " · {} small image{} skipped": "・已跳过 {} 张小图片{:.0}"
+  " · {} small image{} skipped": "・已跳过 {} 张小图片{:.0}",
+  "Also remove the {count} photo{} from “{name}” that are already in the library?": "同时从图库中移除“{name}”中已在图库里的 {count} 张照片吗？{:.0}",
+  "Folder scan: added {} photo{}": "文件夹扫描：已添加 {} 张照片{:.0}",
+  "Inherit (from {from}: {mode})": "继承（来自 {from}：{mode}）"
 }

@@ -296,5 +296,8 @@
   "Move {n} photo{} to “{}”": "Переместить в «{1}» фото: {n}{0:.0}",
   "Move {n} photo{} to “{}”?": "Переместить в «{1}» фото: {n}{0:.0}?",
   "Moved {n} photo{} to “{}”. Edit → Undo moves them back.": "В «{1}» перемещено фото: {n}{0:.0}. Правка → Отменить вернёт их.",
-  " · {} small image{} skipped": " · пропущено маленьких изображений: {}{:.0}"
+  " · {} small image{} skipped": " · пропущено маленьких изображений: {}{:.0}",
+  "Also remove the {count} photo{} from “{name}” that are already in the library?": "Удалить из библиотеки и фото из «{name}», которые уже в ней есть ({count}){:.0}?",
+  "Folder scan: added {} photo{}": "Сканирование папок: добавлено фото: {}{:.0}",
+  "Inherit (from {from}: {mode})": "Наследовать (от {from}: {mode})"
 }

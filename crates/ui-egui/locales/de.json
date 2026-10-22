@@ -2345,5 +2345,17 @@
   "Copy Full Path": "Vollständigen Pfad kopieren",
   "Sort Folders": "Ordner sortieren",
   "Sort by Folder Tree": "Nach Ordnerstruktur sortieren",
-  "Sort by Date": "Nach Datum sortieren"
+  "Sort by Date": "Nach Datum sortieren",
+  "Scan": "Scannen",
+  "Once": "Einmal",
+  "Never Scan Folder": "Ordner nie scannen",
+  "Keep Them": "Behalten",
+  "Remove from Library": "Aus Bibliothek entfernen",
+  "Scanning folders": "Ordner werden gescannt",
+  "Inherit (not scanned)": "Übernehmen (nicht gescannt)",
+  "Inherit (default: Never)": "Übernehmen (Standard: Nie)",
+  "Never: photos in this folder and the folders inside it are not added by scans": "Nie: Fotos in diesem Ordner und seinen Unterordnern werden von Scans nicht hinzugefügt",
+  "Once: add the photos in this folder now; later ones are not looked for": "Einmal: Die Fotos in diesem Ordner jetzt hinzufügen; spätere werden nicht gesucht",
+  "Always: add new photos in this folder whenever the folders are scanned": "Immer: Neue Fotos in diesem Ordner bei jedem Scan der Ordner hinzufügen",
+  "Inherit: as the folder above says": "Übernehmen: wie der übergeordnete Ordner"
 }

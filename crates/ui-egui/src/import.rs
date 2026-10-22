@@ -249,6 +249,8 @@ pub struct ImportTask {
     /// Move: originals moved, and sources left in place (reported by the engine with a reason).
     pub moved: usize,
     pub kept: usize,
+    /// Images left out for being smaller than the folder scan's minimum size.
+    pub small: usize,
     /// Structured diagnostics from foreign XMP develop settings.
     pub warnings: Vec<ImportWarning>,
     undo0: usize,
@@ -781,6 +783,7 @@ fn commit_batch(app: &mut LightcraftApp, task: &mut ImportTask, prepared: lightc
             task.failed += len("failed");
             task.moved += len("moved");
             task.kept += len("kept");
+            task.small += v["skipped"]["small"].as_u64().map_or(0, |n| usize::try_from(n).unwrap_or(usize::MAX));
             task.warnings.extend(v["warnings"].as_array().into_iter().flatten().filter_map(|warning| serde_json::from_value(warning.clone()).ok()));
             for k in v["kept"].as_array().into_iter().flatten() {
                 log::warn!("import: kept {}: {}", k["path"].as_str().unwrap_or(""), k["reason"].as_str().unwrap_or(""));
@@ -925,6 +928,9 @@ fn finish(app: &mut LightcraftApp, ctx: &egui::Context, task: ImportTask) {
     }
     if task.failed > 0 {
         msg.push_str(&crate::i18n::tr_format!(" · {} not readable", task.failed));
+    }
+    if task.small > 0 {
+        msg.push_str(&crate::i18n::tr_format!(" · {} small image{} skipped", task.small, plural(task.small)));
     }
     if task.warnings.is_empty() {
         app.toast(ctx, msg);

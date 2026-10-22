@@ -32,7 +32,7 @@ use std::collections::BTreeMap;
 use std::sync::Arc;
 
 pub use dates::{DateRun, GroupBy};
-pub use folders::{DatedFolder, FolderNode, FolderRecord};
+pub use folders::{DatedFolder, EffectiveScan, FolderNode, FolderRecord, ScanMode, ScanRules};
 pub use journal::{Journal, LoadReport, PersistStats, SnapshotPolicy, SnapshotTiming};
 pub use keywords::KeywordNode;
 use lightcraft_develop::DevelopSettings;
@@ -1147,6 +1147,8 @@ mod tests_album_order;
 mod tests_background;
 #[cfg(test)]
 mod tests_folder_records;
+#[cfg(test)]
+mod tests_folder_scan;
 #[cfg(test)]
 mod tests_folders;
 #[cfg(test)]

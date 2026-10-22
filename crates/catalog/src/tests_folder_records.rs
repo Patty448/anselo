@@ -107,7 +107,7 @@ fn a_path_that_names_no_folder_is_refused() {
     let mut c = library();
     let before = c.to_snapshot();
     for bad in ["", "relative/trip", ".", "a/.."] {
-        let op = Op::SetFolderRecord { folder: bad.into(), record: Some(FolderRecord { label: Some(ColorLabel::Red) }) };
+        let op = Op::SetFolderRecord { folder: bad.into(), record: Some(FolderRecord { label: Some(ColorLabel::Red), ..Default::default() }) };
         assert!(c.apply(op).is_err(), "{bad:?} names no folder");
     }
     assert_eq!(c.to_snapshot(), before);

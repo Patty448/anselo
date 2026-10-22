@@ -24,7 +24,8 @@
 //! two rows. Each row is still consistent: choosing it shows exactly the photos it counts.
 //!
 //! A folder is otherwise only where photos are, but the library can also keep a
-//! [`FolderRecord`] about it (its colour label), stored under the folder's identity
+//! [`FolderRecord`] about it (its colour label, and whether folder scans look in it: its
+//! [`ScanMode`], also for a folder that holds no photo yet), stored under the folder's identity
 //! ([`crate::query::folder_key`]). A record follows its folder when the folder is renamed or moved
 //! here ([`Catalog::folder_records_follow`]); one about a folder that no longer holds a photo is
 //! kept (undo can bring the photos back) and shows again when the folder does.
@@ -77,13 +78,96 @@ pub struct FolderRecord {
     /// A colour label, as a photo has one.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub label: Option<ColorLabel>,
+    /// Whether folder scans look in this folder and the folders inside it (`None`: as the folder
+    /// above says, see [`Catalog::folder_scan_mode`]). Format version 10.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scan: Option<ScanMode>,
 }
 
 impl FolderRecord {
     /// Whether the record says nothing (and so is not kept).
     pub fn is_empty(&self) -> bool {
-        self.label.is_none()
+        self.label.is_none() && self.scan.is_none()
     }
+}
+
+/// Whether the library looks for new photos in a folder on disk (and the folders inside it,
+/// unless one of them says otherwise).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum ScanMode {
+    /// Never: its photos are not added by a folder scan (nor by Auto Import).
+    Never,
+    /// Its photos were added once, when the mode was set; later files are not looked for.
+    Once,
+    /// Its new photos are added whenever it is scanned.
+    Always,
+}
+
+impl ScanMode {
+    pub fn parse(s: &str) -> Option<Self> {
+        match s {
+            "never" => Some(Self::Never),
+            "once" => Some(Self::Once),
+            "always" => Some(Self::Always),
+            _ => None,
+        }
+    }
+
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Never => "never",
+            Self::Once => "once",
+            Self::Always => "always",
+        }
+    }
+}
+
+/// Where folder scans look ([`Catalog::scan_rules`]).
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct ScanRules {
+    /// (folder key, its mode).
+    records: Vec<(String, ScanMode)>,
+    /// (folder key, the default location as spelled).
+    defaults: Vec<(String, String)>,
+}
+
+impl ScanRules {
+    /// The scan mode in effect for folder `path`: the one set on the nearest of it and the
+    /// folders above it, where a default location counts as set to Never unless the library keeps
+    /// a mode for that very folder. So a mode set on a default location overrides it, taking that
+    /// mode off brings the default back, and a default inside a folder set to Always still keeps
+    /// its subtree out. Nothing set anywhere above: not scanned.
+    pub fn mode(&self, path: &str) -> EffectiveScan {
+        let Some(key) = record_key(path) else { return EffectiveScan::default() };
+        // the nearest folder at or above `path` that says something (a longer key is nearer:
+        // they all lead to `key`)
+        let record = self.records.iter().filter(|(k, _)| key_within(&key, k)).max_by_key(|(k, _)| k.len());
+        let default = self.defaults.iter().filter(|(k, _)| key_within(&key, k)).max_by_key(|(k, _)| k.len());
+        match (record, default) {
+            (Some((rk, mode)), Some((dk, _))) if rk.len() >= dk.len() => EffectiveScan { mode: Some(*mode), from: Some(rk.clone()), default: false },
+            (_, Some((_, d))) => EffectiveScan { mode: Some(ScanMode::Never), from: Some(d.clone()), default: true },
+            (Some((rk, mode)), None) => EffectiveScan { mode: Some(*mode), from: Some(rk.clone()), default: false },
+            (None, None) => EffectiveScan::default(),
+        }
+    }
+
+    /// The folders set to `mode`, by identity key.
+    pub fn set_to(&self, mode: ScanMode) -> impl Iterator<Item = &str> {
+        self.records.iter().filter(move |(_, m)| *m == mode).map(|(k, _)| k.as_str())
+    }
+}
+
+/// The scan mode in effect for a folder ([`Catalog::folder_scan_mode`]).
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]
+pub struct EffectiveScan {
+    /// `None`: not scanned (no folder above it says anything).
+    pub mode: Option<ScanMode>,
+    /// The folder that says so (the folder itself or one above it), as its record or the default
+    /// spells it; `None` with `mode`.
+    pub from: Option<String>,
+    /// It is one of the built-in Never locations, not something the library keeps.
+    pub default: bool,
 }
 
 /// The identity a folder's record is kept under: its [`folder_key`]; `None` for a path that
@@ -91,6 +175,12 @@ impl FolderRecord {
 pub(crate) fn record_key(path: &str) -> Option<String> {
     let key = folder_key(path);
     (split_path(path, true).absolute && !key.is_empty()).then_some(key)
+}
+
+/// Whether `path` names a folder a record can be kept about (absolute, not empty): its identity
+/// key.
+pub fn record_key_of(path: &str) -> Option<String> {
+    record_key(path)
 }
 
 /// A folder while the tree is being built (children by identity key).
@@ -199,6 +289,35 @@ impl Catalog {
         let mut record = self.folder_record(path).cloned().unwrap_or_default();
         record.label = label;
         Op::SetFolderRecord { folder: path.to_string(), record: Some(record) }
+    }
+
+    /// The scan mode of folder `path` as set on it, however it is spelled (`None`: inherited).
+    pub fn folder_scan_record(&self, path: &str) -> Option<ScanMode> {
+        self.folder_record(path).and_then(|r| r.scan)
+    }
+
+    /// The op that gives folder `path` scan mode `mode` (`None`: inherit from the folder above),
+    /// keeping the rest of its record. Applying it checks the path.
+    pub fn folder_scan_op(&self, path: &str, mode: Option<ScanMode>) -> Op {
+        let mut record = self.folder_record(path).cloned().unwrap_or_default();
+        record.scan = mode;
+        Op::SetFolderRecord { folder: path.to_string(), record: Some(record) }
+    }
+
+    /// The folders given a scan mode, by identity key, in key order.
+    pub fn folder_scan_records(&self) -> Vec<(String, ScanMode)> {
+        self.folder_records.iter().filter_map(|(k, r)| Some((k.clone(), r.scan?))).collect()
+    }
+
+    /// The scan mode in effect for folder `path`: see [`ScanRules::mode`].
+    pub fn folder_scan_mode(&self, path: &str, defaults: &[String]) -> EffectiveScan {
+        self.scan_rules(defaults).mode(path)
+    }
+
+    /// The folders given a scan mode and the built-in Never locations `defaults` (any spelling),
+    /// detached from the catalog (a folder scan resolves modes on a worker thread).
+    pub fn scan_rules(&self, defaults: &[String]) -> ScanRules {
+        ScanRules { records: self.folder_scan_records(), defaults: defaults.iter().filter_map(|d| Some((record_key(d)?, d.clone()))).collect() }
     }
 
     /// The ops that carry the records of folder `from` and the folders inside it over to `to`

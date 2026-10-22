@@ -185,6 +185,17 @@ struct ViewFile {
 }
 
 impl Library {
+    /// A file of the library's own (beside presets.json), `None` when it isn't there or can't be
+    /// read (logged).
+    pub(crate) fn read_file(&mut self, name: &str) -> Option<Vec<u8>> {
+        self.files.read(name).map_err(|e| log::warn!("library: {name}: {e}")).ok().flatten()
+    }
+
+    /// Replace a file of the library's own atomically.
+    pub(crate) fn write_file(&mut self, name: &str, data: &[u8]) -> std::io::Result<()> {
+        self.files.write_atomic(name, data)
+    }
+
     pub fn journal(&self) -> &Journal {
         &self.journal
     }
@@ -564,6 +575,8 @@ impl Session {
         let presets_saved = PresetsSaved::state_of(self);
         // photo ids are per library: drop decoded sources of the previous one
         self.media.clear_sources();
+        // (and what folder scans saw is the library's own)
+        self.scan_state = None;
         if on_disk {
             self.media.attach_disk_cache(&dir.join("thumbs"), self.cache_bytes());
             self.tidy_thumbnail_cache();

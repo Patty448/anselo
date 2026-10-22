@@ -672,7 +672,7 @@ pub(crate) fn photo_in_root(p: &Photo, root: &str) -> bool {
 }
 
 /// [`folder_within`] for two paths already turned into their [`folder_key`].
-pub(crate) fn key_within(p: &str, r: &str) -> bool {
+pub fn key_within(p: &str, r: &str) -> bool {
     // `.` or `a/..` name no folder: not "everything"
     if r.is_empty() {
         return false;

@@ -65,17 +65,31 @@ pub type NoteFolder<'a> = &'a mut dyn FnMut(&Path, Vec<(std::ffi::OsString, Entr
 /// are left out, the folder `skip` (e.g. the library's own) is never entered, and the walk stops
 /// at `limits` (see [`Walked::truncated`]). Unreadable folders are skipped.
 pub fn files_in(root: &Path, skip: Option<&Path>, limits: Limits, keep: impl FnMut(&Path) -> bool) -> Walked {
-    walk(root, skip, limits, keep, None)
+    walk(root, skip, &[], limits, keep, None)
+}
+
+/// [`files_in`], never entering the folders `except` either (their
+/// [`lightcraft_catalog::query::folder_key`]s, e.g. the folders a folder scan is told to leave
+/// alone).
+pub fn files_in_except(root: &Path, skip: Option<&Path>, except: &[String], limits: Limits, keep: impl FnMut(&Path) -> bool) -> Walked {
+    walk(root, skip, except, limits, keep, None)
 }
 
 /// [`files_in`], handing the listing of every folder it reads to `note`: who walks a folder to
 /// find its files has, with that, the answer to "is this name there" for everything in it, and
 /// need not ask the disk again (a round trip for each name on a network share).
 pub fn files_in_noting(root: &Path, skip: Option<&Path>, limits: Limits, keep: impl FnMut(&Path) -> bool, note: NoteFolder) -> Walked {
-    walk(root, skip, limits, keep, Some(note))
+    walk(root, skip, &[], limits, keep, Some(note))
 }
 
-fn walk(root: &Path, skip: Option<&Path>, limits: Limits, mut keep: impl FnMut(&Path) -> bool, mut note: Option<NoteFolder>) -> Walked {
+fn walk(
+    root: &Path,
+    skip: Option<&Path>,
+    except: &[String],
+    limits: Limits,
+    mut keep: impl FnMut(&Path) -> bool,
+    mut note: Option<NoteFolder>,
+) -> Walked {
     let mut out = Walked::default();
     // canonical folders reached through a link, so a link loop is walked at most once
     let mut linked: HashSet<PathBuf> = HashSet::new();
@@ -94,6 +108,9 @@ fn walk(root: &Path, skip: Option<&Path>, limits: Limits, mut keep: impl FnMut(&
             continue;
         }
         if skip.is_some_and(|s| path == s) || skip_canonical.as_ref().is_some_and(|s| std::fs::canonicalize(&path).is_ok_and(|p| p.starts_with(s))) {
+            continue;
+        }
+        if !except.is_empty() && except.contains(&lightcraft_catalog::query::folder_key(&path.to_string_lossy())) {
             continue;
         }
         if depth >= limits.max_depth {

@@ -109,6 +109,14 @@ pub struct ImportOptions {
     pub metadata_preset: Option<String>,
     /// Copy: raws are copied as DNG (Copy as DNG).
     pub convert_dng: bool,
+    /// Folder scans (Once / Always): images whose long edge is shorter than this many pixels are
+    /// left out ([`ImportReport::skipped`]); icons and thumbnails are not photos. `None` (manual
+    /// imports, Auto Import) takes every size; a video, or a file whose size isn't known, is
+    /// never left out.
+    pub min_long_edge: Option<u32>,
+    /// Folders inside the imported ones that are not looked in (any spelling): a folder scan's
+    /// Never folders.
+    pub exclude: Vec<String>,
 }
 
 /// How copies are filed in the destination. The date is the capture time, else the time of the
@@ -213,6 +221,22 @@ pub struct ImportReport {
     /// Per-photo diagnostics from foreign XMP develop settings that could not be fully carried over.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub warnings: Vec<ImportWarning>,
+    /// Files left out on purpose, by reason.
+    #[serde(skip_serializing_if = "Skipped::is_empty")]
+    pub skipped: Skipped,
+}
+
+/// Files an import left out on purpose ([`ImportReport::skipped`]), counted by reason.
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]
+pub struct Skipped {
+    /// Smaller than [`ImportOptions::min_long_edge`].
+    pub small: usize,
+}
+
+impl Skipped {
+    pub fn is_empty(&self) -> bool {
+        self.small == 0
+    }
 }
 
 /// A structured diagnostic from foreign XMP develop settings.
@@ -312,7 +336,21 @@ pub struct ImportDefaults {
     pub auto_album: Option<String>,
     /// Open the import review when a camera or memory card is connected.
     pub show_on_card: bool,
+    /// Folder scans (Once / Always, see [`crate::folder_scan`]): images whose long edge is
+    /// shorter than this many pixels are left out (`None` = [`SCAN_MIN_LONG_EDGE`]; 0 takes
+    /// every size).
+    pub scan_min_long_edge: Option<u32>,
+    /// Minutes between the full rescans of the Always folders (`None` = [`SCAN_RESCAN_MINUTES`]).
+    pub scan_rescan_minutes: Option<u32>,
 }
+
+/// The default of [`ImportDefaults::scan_min_long_edge`]: smaller images are icons, thumbnails and
+/// web graphics, not photos.
+pub const SCAN_MIN_LONG_EDGE: u32 = 300;
+/// The default of [`ImportDefaults::scan_rescan_minutes`].
+pub const SCAN_RESCAN_MINUTES: u32 = 30;
+/// The longest rescan interval that can be set (a day).
+pub const SCAN_RESCAN_MAX_MINUTES: u32 = 24 * 60;
 
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
@@ -324,6 +362,16 @@ pub struct CameraDefault {
 }
 
 impl ImportDefaults {
+    /// The minimum long edge of folder scans, in pixels (0: every size).
+    pub fn scan_min_long_edge(&self) -> u32 {
+        self.scan_min_long_edge.unwrap_or(SCAN_MIN_LONG_EDGE)
+    }
+
+    /// Minutes between full rescans of the Always folders (at least 1).
+    pub fn scan_rescan_minutes(&self) -> u32 {
+        self.scan_rescan_minutes.unwrap_or(SCAN_RESCAN_MINUTES).clamp(1, SCAN_RESCAN_MAX_MINUTES)
+    }
+
     /// The preset id that applies to a photo of this kind and camera, if any.
     pub fn preset_for(&self, raw: bool, camera: &str) -> Option<&str> {
         if !raw {
@@ -378,6 +426,30 @@ pub fn is_supported(path: &Path) -> bool {
 /// walk that stops at a bound is logged.
 pub fn expand(paths: &[String], skip: Option<&Path>) -> Vec<String> {
     expand_within(paths, skip, crate::walk::Limits::default()).0
+}
+
+/// [`expand`], never entering the folders `except` (any spelling).
+pub fn expand_except(paths: &[String], skip: Option<&Path>, except: &[String]) -> Vec<String> {
+    let except: Vec<String> = except.iter().map(|e| lightcraft_catalog::query::folder_key(e)).collect();
+    let mut out = Vec::new();
+    for p in paths {
+        let path = Path::new(p);
+        if except.contains(&lightcraft_catalog::query::folder_key(p)) {
+            continue;
+        }
+        if path.is_dir() {
+            let w = crate::walk::files_in_except(path, skip, &except, crate::walk::Limits::default(), is_supported);
+            if w.truncated {
+                log::warn!("import: stopped looking in {} after {} entries", path.display(), w.entries);
+            }
+            out.extend(w.files.into_iter().map(|f| f.to_string_lossy().to_string()));
+        } else {
+            out.push(p.clone());
+        }
+    }
+    let mut seen = std::collections::HashSet::new();
+    out.retain(|p| seen.insert(p.clone()));
+    out
 }
 
 /// [`expand`] with the walk bounded by `limits` → (files, whether a walk stopped at a bound).
@@ -818,6 +890,8 @@ enum PreparedItem {
     },
     Failed(String, String),
     Kept(Kept),
+    /// Smaller than [`ImportOptions::min_long_edge`].
+    Small,
     Ready(Box<ReadyFile>),
 }
 
@@ -954,7 +1028,11 @@ impl ImportJob {
     /// Expand `paths` (folders recursively, the library's own folder skipped) into the files an
     /// import would handle; counted in [`ImportJob::total`].
     pub fn expand(&self, paths: &[String]) -> Vec<String> {
-        let files = expand(paths, self.lib_dir.as_deref());
+        let files = if self.opts.exclude.is_empty() {
+            expand(paths, self.lib_dir.as_deref())
+        } else {
+            expand_except(paths, self.lib_dir.as_deref(), &self.opts.exclude)
+        };
         self.total.fetch_add(files.len(), std::sync::atomic::Ordering::Relaxed);
         files
     }
@@ -1042,6 +1120,11 @@ impl ImportJob {
                     continue;
                 }
             };
+            if too_small(&info, opts.min_long_edge) {
+                self.done.fetch_add(1, Relaxed);
+                plan.slots.push(Slot::Item(PreparedItem::Small));
+                continue;
+            }
             // a copy of a file whose transfer is still pending: a duplicate only if that one succeeds
             if !opts.local
                 && let Some(h) = &info.content_hash
@@ -1160,6 +1243,13 @@ impl ImportJob {
             out.items.push(item);
         }
     }
+}
+
+/// Whether an import with a minimum long edge leaves this file out: an image (raws included)
+/// whose size is known and whose long edge is shorter.
+fn too_small(info: &ProbeInfo, min_long_edge: Option<u32>) -> bool {
+    let long = info.width.max(info.height);
+    min_long_edge.is_some_and(|m| info.kind != MediaKind::Video && long > 0 && long < m)
 }
 
 /// A batch's items in file order while its transfers are pending ([`ImportJob::run_plan`]).
@@ -1395,6 +1485,7 @@ pub fn commit_prepared(s: &mut Session, opts: &ImportOptions, now: &str, prepare
             }
             PreparedItem::Failed(path, e) => report.failed.push((path, e)),
             PreparedItem::Kept(k) => report.kept.push(k),
+            PreparedItem::Small => report.skipped.small += 1,
             PreparedItem::Ready(r) => {
                 let ReadyFile { path, stored, info, sidecar, placed: pl } = *r;
                 placed.extend(pl);

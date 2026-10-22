@@ -6,7 +6,7 @@
 
 ### Done
 - **Phase 1, Copy Full Path: committed as `b5d34059`** (`MENU-PHOTO-COPYPATH: Copy Full Path in photo and folder menus (app.copyPath)`).
-  - CI (2026-10-20, `RUST_TEST_THREADS=2 cargo xtask ci`): fmt, clippy, heif, test (whole workspace, no OOM with about 9 GB free), parity, layers and assets passed.
+  - CI (2026-10-20, `RUST_TEST_THREADS=2 cargo xtask ci`): fmt, clippy, heif, test (whole workspace), parity, layers and assets passed.
   - wasm first failed because the `wasm32-unknown-unknown` target was missing. The user approved installing it (`rustup target add wasm32-unknown-unknown`), and `cargo xtask wasm` then passed on the unchanged tree.
 - **Phase 2, Folders "Sort by Date": committed as `4a3c7780`** (`LRC-LIB-FOLDERS-BYDATE: Folders ▸ Sort by Date (view.folderSort)`). Full `cargo xtask ci` was green (all 8 steps, after a `cargo fmt` fix).
   - `Catalog::folders_by_date() -> Vec<DatedFolder {folder, date}>` (`catalog/src/folders.rs`), plus `DatedFolder::year()` and `dated()` (a time counts only when it starts with 4 ASCII digits). It reuses `folder_tree()`: nodes with `own > 0`, children emptied, count unchanged.
@@ -55,7 +55,7 @@
 ### Unfinished or uncertain
 - Phase 1 (Copy Full Path) hasn't been checked in the running app; the clipboard can't be seen in a headless snapshot. Phase 2 was checked by a headless snapshot only, not in the windowed app.
 - On Windows, `native_path` turns a folder row's forward slashes into backslashes. That has only been tested through a `cfg!(windows)` branch in the test, never on Windows.
-- The whole workspace test suite fits in memory with `RUST_TEST_THREADS=2` and about 9 GB free. It OOM'd earlier only when memory was tight; `tests_masking::edit_in_photocraft_opens_a_psd_copy` alone peaks at about 3.5 GB.
+- The whole workspace test suite can run out of memory on machines with little free RAM; `RUST_TEST_THREADS=2` keeps it in bounds. `tests_masking::edit_in_photocraft_opens_a_psd_copy` alone peaks at about 3.5 GB.
 - The memory reaper may stop long background runs again while memory is tight.
 - Phase 3 open points: the 300 px filter runs after the probe (a small file is read once, then skipped); a file that failed to import isn't retried until restart or until its folder changes; a photo emptied out of Recently Deleted returns only when its folder changes or with `library.scanFolders {full: true}`. The safety-interval rescans use the mtime skip (not `full`).
 
@@ -208,3 +208,4 @@ Earlier recommendation: **`notify`**. It is the standard choice and gives native
 | 2026-10-20 | Always roots use change notifications plus mtime-skipping rescans with a polling fallback; a full lazy whole-computer Folder Manager; default Never locations; the Never removal question; small-image filter; scan measurements |
 | 2026-10-22 | Phase 3 done (two commits); catalog format 10; resolution rule, settle time and open points recorded |
 | 2026-10-22 | The file is committed instead of kept local |
+| 2026-10-22 | Machine-specific memory notes trimmed |

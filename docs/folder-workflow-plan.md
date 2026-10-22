@@ -56,7 +56,6 @@
 - Phase 1 (Copy Full Path) hasn't been checked in the running app; the clipboard can't be seen in a headless snapshot. Phase 2 was checked by a headless snapshot only, not in the windowed app.
 - On Windows, `native_path` turns a folder row's forward slashes into backslashes. That has only been tested through a `cfg!(windows)` branch in the test, never on Windows.
 - The whole workspace test suite can run out of memory on machines with little free RAM; `RUST_TEST_THREADS=2` keeps it in bounds. `tests_masking::edit_in_photocraft_opens_a_psd_copy` alone peaks at about 3.5 GB.
-- The memory reaper may stop long background runs again while memory is tight.
 - Phase 3 open points: the 300 px filter runs after the probe (a small file is read once, then skipped); a file that failed to import isn't retried until restart or until its folder changes; a photo emptied out of Recently Deleted returns only when its folder changes or with `library.scanFolders {full: true}`. The safety-interval rescans use the mtime skip (not `full`).
 
 This plan adds a Picasa-style folder workflow on top of what LightCraft already has. Existing features are
@@ -208,4 +207,4 @@ Earlier recommendation: **`notify`**. It is the standard choice and gives native
 | 2026-10-20 | Always roots use change notifications plus mtime-skipping rescans with a polling fallback; a full lazy whole-computer Folder Manager; default Never locations; the Never removal question; small-image filter; scan measurements |
 | 2026-10-22 | Phase 3 done (two commits); catalog format 10; resolution rule, settle time and open points recorded |
 | 2026-10-22 | The file is committed instead of kept local |
-| 2026-10-22 | Machine-specific memory notes trimmed |
+| 2026-10-22 | Machine-specific memory notes trimmed, the memory reaper note dropped |

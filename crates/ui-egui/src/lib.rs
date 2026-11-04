@@ -6,6 +6,10 @@
 #![forbid(unsafe_code)]
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic, clippy::unimplemented, clippy::todo, clippy::unreachable)]
 
+/// The name this build shows (window title, About): this fork is Anselo, so it can be told apart
+/// from an installed LightCraft.
+pub const APP_NAME: &str = "Anselo";
+
 pub mod album_picker;
 pub mod brush_live;
 pub mod button;
@@ -1458,11 +1462,11 @@ impl LightcraftApp {
         ctx.send_viewport_cmd(egui::ViewportCommand::Title(self.window_title()));
     }
 
-    /// "LightCraft — <library name>" (just "LightCraft" for a library that isn't saved).
+    /// "Anselo — <library name>" (just "Anselo" for a library that isn't saved).
     pub fn window_title(&self) -> String {
         match panels::settings::open_library_name(self) {
-            Some(name) => format!("LightCraft — {name}"),
-            None => "LightCraft".to_string(),
+            Some(name) => format!("{APP_NAME} — {name}"),
+            None => APP_NAME.to_string(),
         }
     }
 

@@ -184,10 +184,10 @@ pub fn body(app: &mut LightcraftApp, ui: &mut egui::Ui, t: &Tokens) {
     ui.horizontal(|ui| {
         let mut hidden = app.folder_manager.show_hidden;
         let r = ui.checkbox(&mut hidden, crate::i18n::tr("Show hidden folders"));
-        register(ui.ctx(), "check:folderManagerHidden", r.rect);
+        register(ui, "check:folderManagerHidden", r.rect);
         app.folder_manager.show_hidden = hidden;
         let r = ui.button(crate::i18n::tr("Refresh"));
-        register(ui.ctx(), "button:folderManagerRefresh", r.rect);
+        register(ui, "button:folderManagerRefresh", r.rect);
         if r.clicked() {
             app.folder_manager.refresh();
         }
@@ -228,9 +228,9 @@ fn question(app: &mut LightcraftApp, ui: &mut egui::Ui, t: &Tokens) {
         ui.label(RichText::new(crate::i18n::tr("They move to Recently Deleted and can be restored; no file on disk is touched.")).color(t.text_dim));
         ui.horizontal(|ui| {
             let keep = ui.button(crate::i18n::tr("Keep Them"));
-            register(ui.ctx(), "button:folderManagerKeep", keep.rect);
+            register(ui, "button:folderManagerKeep", keep.rect);
             let remove = ui.button(crate::i18n::tr("Remove from Library"));
-            register(ui.ctx(), "button:folderManagerRemove", remove.rect);
+            register(ui, "button:folderManagerRemove", remove.rect);
             if keep.clicked() {
                 app.folder_manager.question = None;
             }
@@ -275,7 +275,7 @@ fn tree(app: &mut LightcraftApp, ui: &mut egui::Ui, t: &Tokens, frame: &mut Fram
         ui.horizontal(|ui| {
             ui.add_space(inset);
             let r = ui.link(crate::i18n::tr_format!("{n} more…", n = listing.more));
-            register(ui.ctx(), format!("folderManager:more:{path}"), r.rect);
+            register(ui, format!("folderManager:more:{path}"), r.rect);
             if r.clicked() {
                 let fm = &mut app.folder_manager;
                 fm.all.insert(path.to_string());
@@ -295,7 +295,7 @@ fn row(app: &mut LightcraftApp, ui: &mut egui::Ui, t: &Tokens, frame: &mut Frame
         let open = app.folder_manager.is_open(path);
         let (rect, r) = ui.allocate_exact_size(egui::vec2(16.0, 16.0), egui::Sense::click());
         paint(ui.painter(), rect, if open { Icon::ChevronDown } else { Icon::ChevronRight }, t.text_dim);
-        register(ui.ctx(), format!("folderManager:toggle:{path}"), r.rect);
+        register(ui, format!("folderManager:toggle:{path}"), r.rect);
         if r.clicked() {
             let fm = &mut app.folder_manager;
             if open {
@@ -307,7 +307,7 @@ fn row(app: &mut LightcraftApp, ui: &mut egui::Ui, t: &Tokens, frame: &mut Frame
         let (rect, _) = ui.allocate_exact_size(egui::vec2(16.0, 16.0), egui::Sense::hover());
         paint(ui.painter(), rect, Icon::Folder, t.text_dim);
         let r = ui.add(egui::Label::new(RichText::new(name).color(t.text)).truncate()).on_hover_text(path);
-        register(ui.ctx(), format!("folderManager:row:{path}"), r.rect);
+        register(ui, format!("folderManager:row:{path}"), r.rect);
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
             // (clear of the scroll bar)
             ui.add_space(14.0);
@@ -323,14 +323,14 @@ fn row(app: &mut LightcraftApp, ui: &mut egui::Ui, t: &Tokens, frame: &mut Frame
                     // (Once imports now: not while another import runs)
                     let enabled = mode != Some(ScanMode::Once) || app.import.is_none();
                     let r = ui.add_enabled(enabled, egui::RadioButton::new(own == mode, crate::i18n::tr(text)));
-                    register(ui.ctx(), format!("folderManager:choice:{id}"), r.rect);
+                    register(ui, format!("folderManager:choice:{id}"), r.rect);
                     if r.clicked() {
                         frame.chosen = Some((path.to_string(), name.to_string(), mode));
                         ui.close();
                     }
                 }
             });
-            register(ui.ctx(), format!("folderManager:mode:{path}"), menu.response.rect);
+            register(ui, format!("folderManager:mode:{path}"), menu.response.rect);
             let badge = mode_badge(ui, t, &effective, own.is_some());
             // (what the row says, for the control channel and tests)
             let mode = effective.mode.map_or("none", ScanMode::as_str);
@@ -341,10 +341,10 @@ fn row(app: &mut LightcraftApp, ui: &mut egui::Ui, t: &Tokens, frame: &mut Frame
             } else {
                 "inherited"
             };
-            register(ui.ctx(), format!("folderManager:effective:{path}:{mode}:{whose}"), badge);
+            register(ui, format!("folderManager:effective:{path}:{mode}:{whose}"), badge);
             if let Some(why) = polling {
                 let r = ui.label(RichText::new(crate::i18n::tr("Polling")).size(11.0).color(t.text_dim));
-                register(ui.ctx(), format!("folderManager:polling:{path}"), r.rect);
+                register(ui, format!("folderManager:polling:{path}"), r.rect);
                 r.on_hover_text(crate::i18n::tr_format!(
                     "Not watched for changes ({why}); checked every {minutes} min instead.",
                     why = why,
@@ -411,14 +411,14 @@ fn settings(app: &mut LightcraftApp, ui: &mut egui::Ui, t: &Tokens) {
     ui.horizontal(|ui| {
         ui.label(RichText::new(crate::i18n::tr("Skip images smaller than")).color(t.text_label));
         let r = ui.add(egui::DragValue::new(&mut min).range(0..=lightcraft_engine::import::MAX_MIN_LONG_EDGE).suffix(" px"));
-        register(ui.ctx(), "field:folderManagerMinSize", r.rect);
+        register(ui, "field:folderManagerMinSize", r.rect);
         if r.changed() {
             changed = Some(json!({"minLongEdge": min}));
         }
         ui.add_space(12.0);
         ui.label(RichText::new(crate::i18n::tr("Rescan every")).color(t.text_label));
         let r = ui.add(egui::DragValue::new(&mut every).range(1..=lightcraft_engine::import::SCAN_RESCAN_MAX_MINUTES).suffix(" min"));
-        register(ui.ctx(), "field:folderManagerRescan", r.rect);
+        register(ui, "field:folderManagerRescan", r.rect);
         if r.changed() {
             changed = Some(json!({"rescanMinutes": every}));
         }
@@ -431,7 +431,7 @@ fn settings(app: &mut LightcraftApp, ui: &mut egui::Ui, t: &Tokens) {
     }
     ui.horizontal(|ui| {
         let r = ui.button(crate::i18n::tr("Rescan Now"));
-        register(ui.ctx(), "button:folderManagerRescan", r.rect);
+        register(ui, "button:folderManagerRescan", r.rect);
         if r.clicked() {
             app.folder_scans.request();
         }

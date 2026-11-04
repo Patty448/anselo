@@ -247,14 +247,14 @@ pub fn scan_menu(app: &mut LightcraftApp, ui: &mut egui::Ui, path: &str, name: &
             // (Once imports now: not while another import runs)
             let enabled = mode != Some(ScanMode::Once) || app.import.is_none();
             let r = ui.add_enabled(enabled, egui::RadioButton::new(own == mode, label)).on_hover_text(crate::i18n::tr(tip));
-            register(ui.ctx(), format!("folderScan:{id}"), r.rect);
+            register(ui, format!("folderScan:{id}"), r.rect);
             if r.clicked() {
                 choose(app, ui.ctx(), path, name, mode);
                 ui.close();
             }
         }
     });
-    register(ui.ctx(), "folderScanMenu", menu.response.rect);
+    register(ui, "folderScanMenu", menu.response.rect);
 }
 
 fn mode_name(m: ScanMode) -> &'static str {

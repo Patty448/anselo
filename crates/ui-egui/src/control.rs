@@ -306,6 +306,18 @@ pub(crate) fn widget_hit(app: &LightcraftApp, id: &str) -> Option<crate::widgets
 /// profile card's star), so the interactive rect's centre need not lie in the registered rect.
 /// Disabled controls keep working as a no-op: their own probe is enabled and the injected click
 /// is ignored by egui, which is the documented `ui.clickWidget` semantics.
+/// The mouse button a `button` parameter names: `right`, `middle`, `back` or `forward` (the
+/// mouse's side buttons); anything else is the primary one.
+fn pointer_button(name: Option<&str>) -> egui::PointerButton {
+    match name {
+        Some("right") => egui::PointerButton::Secondary,
+        Some("middle") => egui::PointerButton::Middle,
+        Some("back") => egui::PointerButton::Extra1,
+        Some("forward") => egui::PointerButton::Extra2,
+        _ => egui::PointerButton::Primary,
+    }
+}
+
 pub(crate) fn widget_target_visible(ctx: &egui::Context, hit: Option<crate::widgets::WidgetHit>, at: egui::Pos2) -> bool {
     let Some(hit) = hit else {
         // A hand-built registry entry (tests) or painted geometry has no egui widget to own a
@@ -678,7 +690,7 @@ pub(crate) fn gesture_events(app: &mut LightcraftApp, ctx: &egui::Context, metho
                 app.synthetic.push(egui::Event::PointerMoved(at));
             } else if method == "ui.clickWidget" {
                 let n = p.get("count").and_then(Value::as_u64).unwrap_or(1).min(MAX_CLICKS);
-                let button = if s("button") == Some("right") { egui::PointerButton::Secondary } else { egui::PointerButton::Primary };
+                let button = pointer_button(s("button"));
                 app.synthetic.push(egui::Event::PointerMoved(at));
                 for _ in 0..n {
                     app.synthetic.push(egui::Event::PointerButton { pos: at, button, pressed: true, modifiers: m });
@@ -705,7 +717,7 @@ pub(crate) fn gesture_events(app: &mut LightcraftApp, ctx: &egui::Context, metho
         "ui.click" | "ui.drag" => {
             let a = egui::pos2(f("x").unwrap_or(0.0) as f32, f("y").unwrap_or(0.0) as f32);
             let m = modifiers(p);
-            let button = if s("button") == Some("right") { egui::PointerButton::Secondary } else { egui::PointerButton::Primary };
+            let button = pointer_button(s("button"));
             if method == "ui.drag" {
                 let b = egui::pos2(f("toX").unwrap_or(0.0) as f32, f("toY").unwrap_or(0.0) as f32);
                 push_drag(app, a, b, p.get("steps").and_then(Value::as_u64).unwrap_or(10).min(MAX_DRAG_STEPS), m);

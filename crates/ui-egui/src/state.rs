@@ -142,6 +142,14 @@ pub struct UiState {
     /// The last person page left: the People view offers a way back to it next to its title.
     #[serde(skip)]
     pub last_person: Option<String>,
+    /// The photo the single-image view's zoom belongs to: any other photo opens at Fit, as in
+    /// Picasa 3.9 (`docs/picasa-view-plan.md`); cleared when the view is left.
+    #[serde(skip)]
+    pub zoom_photo: Option<u64>,
+    /// The last photo the single-image view showed and its place in the photo list then: the
+    /// mouse's Forward button (`view.forward`) reopens it from the grid.
+    #[serde(skip)]
+    pub last_viewed: Option<(u64, usize)>,
     /// Assisted Culling's burst settings last confirmed (gap in seconds, similarity), for this
     /// session; `None` until the dialog is first confirmed (then 10 s, 0.93).
     #[serde(skip)]
@@ -429,6 +437,8 @@ impl Default for UiState {
             person_page: None,
             person_from: None,
             last_person: None,
+            zoom_photo: None,
+            last_viewed: None,
             cull_burst: None,
             dismissed_faces: Default::default(),
             unnamed_selected: Default::default(),

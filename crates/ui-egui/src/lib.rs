@@ -40,6 +40,7 @@ pub mod links;
 pub mod menus;
 mod missing_sweep;
 mod model_setup;
+mod mouse_nav;
 pub mod panels;
 pub mod pick;
 pub mod recheck;

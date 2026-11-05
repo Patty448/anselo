@@ -271,8 +271,11 @@ impl LightcraftApp {
         // Recent-library checks and launch-list keys read focus/time/keys: they belong to the UI
         // phase, not the hidden-capable `logic` tick (plan §4.5 / migration input contract).
         panels::library_problem::logic(self, ctx);
+        crate::mouse_nav::forget_zoom_outside_the_view(self);
         if self.fonts_ready && !updates_ui::blocks_input(self) {
             shortcuts::handle(self, ctx);
+            // the mouse's Back and Forward buttons
+            crate::mouse_nav::handle(self, ctx);
         }
     }
 

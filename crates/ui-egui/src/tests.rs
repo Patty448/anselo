@@ -68,6 +68,7 @@ mod move_folder;
 mod offline;
 mod open_lightroom;
 pub(super) mod panels;
+mod picasa_mouse;
 mod preset_favorites;
 mod preset_import;
 mod preview_limit;

@@ -4598,8 +4598,9 @@ fn show_briefly_when_photo_changes_in_view_options() {
     assert_eq!(h.app.ui.settings.loupe_info.briefly, InfoOverlay::Off, "a refused change changes nothing");
 }
 
-/// A click on the image zooms to the chosen click-zoom ratio (1:1 by default), animating the
-/// loupe while rendering once at the final size; Z uses the same ratio; a second click returns to Fit.
+/// Z zooms to the chosen click-zoom ratio (1:1 by default), animating the loupe while rendering
+/// once at the final size; a click on the zoomed photo returns to Fit; a drag at Fit zooms to the
+/// same ratio (Picasa-style, `panels/detail/mouse.rs`).
 #[test]
 fn click_zoom_ratio_animates() {
     use crate::render::Slot;
@@ -4614,7 +4615,7 @@ fn click_zoom_ratio_animates() {
     let r = h.request("engine.execute", json!({"command": "view.clickZoom", "params": {"ratio": 5}}), t);
     assert_ne!(r["ok"], true, "{r}");
     let fit = h.app.image_rect.unwrap();
-    h.request("ui.clickWidget", json!({"id": "canvas:image", "fx": 0.5, "fy": 0.5}), t);
+    h.request("ui.key", json!({"key": "z"}), t);
     assert_eq!(h.app.ui.zoom, Zoom::Percent(300.0));
     assert!(h.app.ui.zoom_anim, "animation started");
     // every animation frame asks for the same (final-size) render
@@ -4632,8 +4633,10 @@ fn click_zoom_ratio_animates() {
     assert!(h.app.image_rect.unwrap().width() > fit.width());
     h.request("ui.clickWidget", json!({"id": "canvas:image", "fx": 0.5, "fy": 0.5}), t);
     assert_eq!(h.app.ui.zoom, Zoom::Fit);
-    // Z zooms to the same ratio as a click
-    h.request("ui.key", json!({"key": "z"}), t);
+    h.settle(SETTLE);
+    // a drag at Fit zooms to the same ratio as Z
+    let r = h.request("ui.dragWidget", json!({"id": "canvas:image", "fx": 0.5, "fy": 0.5, "dx": 30.0, "dy": 0.0}), t);
+    assert_eq!(r["ok"], true, "{r}");
     assert_eq!(h.app.ui.zoom, Zoom::Percent(300.0));
     h.request("ui.key", json!({"key": "z"}), t);
     assert_eq!(h.app.ui.zoom, Zoom::Fit);
@@ -4669,7 +4672,7 @@ fn a_zoomed_view_keeps_its_whole_frame_render_canvas_sized() {
     let t = Duration::from_secs(10);
     h.request("ui.set", json!({"view": "detail", "right": "none"}), t);
     h.settle(SETTLE);
-    h.request("ui.clickWidget", json!({"id": "canvas:image", "fx": 0.5, "fy": 0.5}), t);
+    h.request("engine.execute", json!({"command": "view.zoom100"}), t);
     h.settle(SETTLE);
     assert_eq!(h.app.ui.zoom, crate::state::Zoom::Percent(100.0));
     h.step_until(SETTLE, |h| !h.app.renderer.is_pending(Slot::Main));
@@ -4768,18 +4771,17 @@ fn trackpad_pinch_anchors_fractional_zoom_and_scroll_pans() {
     assert_eq!(h.app.ui.pan, (0.5, 0.5));
 }
 
+/// Ctrl+wheel zooms the loupe, notched or not (an unmodified notched wheel goes to the next photo:
+/// `tests/picasa_mouse.rs`).
 #[test]
-fn mouse_wheel_zooms_the_loupe_with_and_without_ctrl() {
+fn mouse_wheel_zooms_the_loupe_with_ctrl() {
     use crate::state::Zoom;
     let mut h = demo([1000.0, 700.0]);
     let t = Duration::from_secs(10);
     h.request("ui.set", json!({"view": "detail", "right": "none", "leftPanel": false, "filmstrip": false}), t);
     h.settle(SETTLE);
-    for (unit, y, modifiers) in [
-        (egui::MouseWheelUnit::Line, 1.0, egui::Modifiers::NONE),
-        (egui::MouseWheelUnit::Line, 1.0, egui::Modifiers::CTRL),
-        (egui::MouseWheelUnit::Point, 50.0, egui::Modifiers::CTRL),
-    ] {
+    for (unit, y, modifiers) in [(egui::MouseWheelUnit::Line, 1.0, egui::Modifiers::CTRL), (egui::MouseWheelUnit::Point, 50.0, egui::Modifiers::CTRL)]
+    {
         h.request("ui.set", json!({"zoom": "fit", "pan": [0.5, 0.5]}), t);
         h.request("ui.hoverWidget", json!({"id": "canvas:image"}), t);
         h.app.synthetic.push(egui::Event::MouseWheel {

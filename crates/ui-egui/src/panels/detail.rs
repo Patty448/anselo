@@ -19,6 +19,7 @@ mod filmstrip;
 mod geometry;
 mod info;
 mod masks;
+mod mouse;
 mod retouch;
 mod window;
 
@@ -142,6 +143,7 @@ pub fn show(app: &mut LightcraftApp, ui: &mut egui::Ui) {
         return;
     };
     let Some(photo) = app.session.catalog.photo(id).cloned() else { return };
+    mouse::reset_zoom_for(app, id);
     brief_info(app, ui.ctx(), id);
     let d = (*photo.develop).clone();
     // the full-screen preview shows the photo only: no tool overlays
@@ -165,6 +167,8 @@ pub fn show(app: &mut LightcraftApp, ui: &mut egui::Ui) {
     let display_aspect = visible_texture_aspect.filter(|a| !crop_tool && (a / aspect - 1.0).abs() > 0.02).unwrap_or(aspect);
     let resp = ui.interact(canvas, egui::Id::unique("loupe"), Sense::click_and_drag());
     announce_photo(app, &resp, &photo);
+    // the wheel goes to the next or previous photo (shown from the next frame on)
+    mouse::wheel_step(app, ui, &resp);
     let mut target_rect = fit_rect(main_area, display_aspect, app.ui.zoom, native, ppp, app.ui.pan);
     let mut img_rect = animated_rect(ui.ctx(), &mut app.ui.zoom_anim, target_rect);
     let in_pane = |pane: Rect, image: Rect| image.translate(pane.center() - main_area.center());
@@ -1049,7 +1053,7 @@ fn general_interaction(app: &mut LightcraftApp, ui: &mut egui::Ui, resp: &egui::
         }
         return;
     }
-    click_zoom_and_pan(app, resp, img, canvas);
+    mouse::click_and_drag(app, resp, img, canvas);
     let _ = (native, aspect);
 }
 
@@ -1058,8 +1062,9 @@ pub(crate) fn zoomed(img: Rect, canvas: Rect) -> bool {
     img.width() > canvas.width() + 1.0 || img.height() > canvas.height() + 1.0
 }
 
-/// The loupe's own click and drag (also Space's hand over a tool, `space_hand`): a click toggles
-/// Fit ↔ the chosen click-zoom ratio at the clicked point, a drag pans when zoomed.
+/// Space's hand over a tool (`space_hand`): a click toggles Fit ↔ the chosen click-zoom ratio at
+/// the clicked point, a drag pans when zoomed. (The photo's own click and drag, with no tool, is
+/// `mouse::click_and_drag`.)
 pub(crate) fn click_zoom_and_pan(app: &mut LightcraftApp, resp: &egui::Response, img: Rect, canvas: Rect) {
     let zoomed = zoomed(img, canvas);
     if resp.double_clicked() || (resp.clicked() && !zoomed) {

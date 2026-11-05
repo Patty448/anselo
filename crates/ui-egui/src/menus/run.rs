@@ -446,6 +446,7 @@ fn ui_commands_2(app: &mut LightcraftApp, ctx: &egui::Context, id: &str, p: &Val
             Ok(json!({"autoAdvance": app.ui.auto_advance}))
         }
         "view.back" => view_back_command(app, ctx),
+        "view.forward" => crate::mouse_nav::forward_command(app),
         "view.slideshow" => {
             // the photos in view, full screen, with the playback settings (see panels::slideshow)
             let now = app.tick_now();

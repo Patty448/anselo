@@ -124,6 +124,8 @@ pub const UI_COMMANDS: &[UiCommand] = &[
     ("view.cropOverlay", "Cycle Crop Overlay", Some("Shift+O"), "View"),
     ("view.cropOverlayOrientation", "Cycle Crop Overlay Orientation", None, "View"),
     ("view.back", "Back to Grid", Some("Escape"), ""),
+    // the mouse's Forward button: back into the last photo viewed (crate::mouse_nav)
+    ("view.forward", "Forward to Last Photo", None, ""),
     ("tool.done", "Done", Some("Enter"), ""),
     ("view.filterBar", "Filter Bar", Some("Shift+F"), "View"),
     ("local.addRoot", "Add Folder to Local", None, ""),

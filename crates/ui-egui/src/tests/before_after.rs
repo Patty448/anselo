@@ -21,6 +21,24 @@ fn click_at(h: &mut Headless, pos: egui::Pos2) {
     h.settle(SETTLE);
 }
 
+/// A drag of 8 points to the right from `pos`: at Fit it zooms in on `pos` (the photo's own
+/// drag, `panels/detail/mouse.rs`), the 8 points then pan the zoomed photo a little.
+fn drag_zoom_at(h: &mut Headless, pos: egui::Pos2) {
+    let m = egui::Modifiers::default();
+    h.app.synthetic.push(egui::Event::PointerMoved(pos));
+    h.app.synthetic.push(egui::Event::PointerButton { pos, button: egui::PointerButton::Primary, pressed: true, modifiers: m });
+    for x in 1..=8 {
+        h.app.synthetic.push(egui::Event::PointerMoved(pos + egui::vec2(x as f32, 0.0)));
+    }
+    let end = pos + egui::vec2(8.0, 0.0);
+    h.app.synthetic.push(egui::Event::PointerButton { pos: end, button: egui::PointerButton::Primary, pressed: false, modifiers: m });
+    // stepped, not settled: the animation checks hold every render back
+    while !h.app.synthetic.is_empty() {
+        h.step();
+    }
+    h.step();
+}
+
 /// The white-balance selector picks the same point of the photo whichever view of a side-by-side
 /// or top/bottom Before / After layout is clicked, at Fit and zoomed in. Clicks on the Before
 /// view used to be mapped through the After view's rectangle, so they sampled the photo's edge.
@@ -77,7 +95,7 @@ fn wb_selector_picks_the_same_point_in_the_before_view() {
 /// on the Before view used to be measured against the After view's rectangle, so it zoomed in on
 /// the photo's edge (#1742).
 #[test]
-fn a_click_in_the_before_view_zooms_in_on_the_point_clicked() {
+fn a_drag_in_the_before_view_zooms_in_on_the_point_pressed() {
     let app = LightcraftApp::new(lightcraft_engine::Session::with_demo(), Services { png: None, ..Default::default() });
     let mut h = Headless::new(app, [1400.0, 900.0], 1.0);
     let r = h.request("ui.set", json!({"view": "detail", "right": "none", "filmstrip": false}), T);
@@ -101,8 +119,8 @@ fn a_click_in_the_before_view_zooms_in_on_the_point_clicked() {
         let mut pans = Vec::new();
         for before_view in [false, true] {
             fit(&mut h, mode);
-            click_at(&mut h, if before_view { after - shift } else { after });
-            assert!(matches!(h.app.ui.zoom, Zoom::Percent(_)), "{mode:?}: the click zoomed in ({:?})", h.app.ui.zoom);
+            drag_zoom_at(&mut h, if before_view { after - shift } else { after });
+            assert!(matches!(h.app.ui.zoom, Zoom::Percent(_)), "{mode:?}: the drag zoomed in ({:?})", h.app.ui.zoom);
             pans.push(h.app.ui.pan);
         }
         let (a, b) = (pans[0], pans[1]);
@@ -198,16 +216,20 @@ fn check_click_animation(mode: BeforeAfter) {
     let photo = h.app.session.catalog.photo(id).expect("photo");
     let native = [photo.width as usize, photo.height as usize];
     let aspect = native[0] as f32 / native[1] as f32;
-    // Exercise clicks in both panes, including their return to Fit, without settling the motion.
+    // Zoom in with a drag in either pane (it jumps there: no animation), then exercise the click
+    // back to Fit in both panes without settling the motion.
     for before_click in [false, true] {
-        for zoom_in in [true, false] {
-            let pos = if zoom_in { fit.center() + egui::vec2(fit.width() * 0.3, fit.height() * -0.25) } else { after.center() };
+        {
+            let pos = fit.center() + egui::vec2(fit.width() * 0.3, fit.height() * -0.25);
+            drag_zoom_at(&mut h, if before_click { pos + shift } else { pos });
+            assert_eq!(h.app.ui.zoom, Zoom::Percent(300.0));
+            let pan = h.app.ui.pan;
+            assert!((pan.0 - 0.8).abs() < 0.02 && (pan.1 - 0.25).abs() < 0.02, "{mode:?}: pressed point {pan:?}");
+        }
+        {
+            let pos = after.center();
             queue_click(&mut h, if before_click { pos + shift } else { pos });
-            assert_eq!(h.app.ui.zoom, if zoom_in { Zoom::Percent(300.0) } else { Zoom::Fit });
-            if zoom_in {
-                let pan = h.app.ui.pan;
-                assert!((pan.0 - 0.8).abs() < 0.02 && (pan.1 - 0.25).abs() < 0.02, "{mode:?}: clicked point {pan:?}");
-            }
+            assert_eq!(h.app.ui.zoom, Zoom::Fit);
             let target = crate::panels::detail::fit_rect(after, aspect, h.app.ui.zoom, native, 1.0, h.app.ui.pan);
             let mut intermediate = 0;
             let mut keys = std::collections::HashSet::new();

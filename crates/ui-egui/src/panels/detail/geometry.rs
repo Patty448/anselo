@@ -125,19 +125,22 @@ pub(super) fn middle_pan(app: &mut LightcraftApp, ui: &egui::Ui, resp: &egui::Re
     true
 }
 
+/// The vertical notches (up is positive) of an unmodified line/page-unit wheel event: a real mouse wheel, not a
+/// trackpad.
+pub(super) fn wheel_notch(e: &egui::Event) -> Option<f32> {
+    match e {
+        egui::Event::MouseWheel { unit: egui::MouseWheelUnit::Line | egui::MouseWheelUnit::Page, delta, modifiers, .. }
+            if *modifiers == egui::Modifiers::NONE && delta.y.is_finite() =>
+        {
+            Some(delta.y)
+        }
+        _ => None,
+    }
+}
+
 /// Net vertical notches (up is positive) of unmodified line/page-unit wheel events: a real mouse wheel, not a trackpad.
-fn wheel_notches(events: &[egui::Event]) -> f32 {
-    events
-        .iter()
-        .filter_map(|e| match e {
-            egui::Event::MouseWheel { unit: egui::MouseWheelUnit::Line | egui::MouseWheelUnit::Page, delta, modifiers, .. }
-                if *modifiers == egui::Modifiers::NONE && delta.y.is_finite() =>
-            {
-                Some(delta.y)
-            }
-            _ => None,
-        })
-        .sum()
+pub(super) fn wheel_notches(events: &[egui::Event]) -> f32 {
+    events.iter().filter_map(wheel_notch).sum()
 }
 
 /// Native pinch (also modifier-wheel zoom) and two-finger scroll, scoped to this image view.
